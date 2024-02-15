@@ -41,7 +41,7 @@ gcloud compute ssh labrat \
 
 SNAKEMAKE_COMMAND='snakemake -call results/test-elec/networks/elec_s_6_ec_lcopt_Co2L-24H.nc --configfile config/test/config.electricity.yaml'
 
-DOCKER_COMMAND="sudo docker run -v ~/$INPUT_DIR_NAME/:/$INPUT_DIR_NAME/ -v ~/$OUTPUT_DIR_NAME:/$OUTPUT_DIR_NAME --entrypoint /bin/bash akshatmittaloet/pypsa-eur:v2.0 -c '$SNAKEMAKE_COMMAND'"
+DOCKER_COMMAND="sudo docker run -v ~/$INPUT_DIR_NAME/:/$INPUT_DIR_NAME/ -v ~/$OUTPUT_DIR_NAME:/$OUTPUT_DIR_NAME -v ~/logs:/logs --entrypoint /bin/bash akshatmittaloet/pypsa-eur:v2.0 -c '$SNAKEMAKE_COMMAND'"
 
 echo $DOCKER_COMMAND
 
@@ -50,6 +50,10 @@ gcloud compute ssh labrat \
     --zone=us-west4-b 
 
 gcloud compute scp --recurse labrat:~/$OUTPUT_DIR_NAME/ \
+    "$(pwd)"/ \
+    --zone=us-west4-b
+
+gcloud compute scp --recurse labrat:~/logs/ \
     "$(pwd)"/ \
     --zone=us-west4-b
 

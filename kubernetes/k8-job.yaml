@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: solving-pypsa
+  namespace: bucket-fuse
+  labels:
+    jobgroup: prepared-solver
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      name: solver-pod
+      namespace: bucket-fuse
+      annotations:
+        gke-gcsfuse/volumes: "true"
+      labels:
+        jobgroup: prepared-solver
+    spec:
+      serviceAccountName: bucket-account
+      restartPolicy: Never
+      containers:
+        - name: cal-img
+          image: akshatmittaloet/pypsa-eur:v3.0
+          resources:
+            requests:
+              cpu: "2"
+              memory: "16Gi"
+              ephemeral-storage: "10Gi"
+          volumeMounts:
+            - name: base-ssd
+              mountPath: "/tmp"
+            - name: gcs-fuse-csi-inline-1
+              mountPath: "/config"
+            - name: gcs-fuse-csi-inline-2
+              mountPath: "/results"
+          command: ["/bin/bash"]
+          args: ["-c","bash", "pypsa-eur/kubernetes/pod-run.sh", "'snakemake -call results/test-elec/networks/elec_s_6_ec_lcopt_Co2L-24H.nc --configfile config/test/config.electricity.yaml'"]
+          # args: ["snakemake -call results/test-elec/networks/elec_s_6_ec_lcopt_Co2L-24H.nc --configfile config/test/config.electricity.yaml"]
+      volumes:
+      - name: base-ssd
+        ephemeral:
+          volumeClaimTemplate:
+            metadata:
+              labels:
+                type: base-ssd
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              storageClassName: "ssd"
+              resources:
+                requests:
+                  storage: 20Gi
+      - name: gcs-fuse-csi-inline-1
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: cal-cluster-input
+            mountOptions: "debug_fuse,debug_fs,debug_gcs,implicit-dirs,only-dir=config"
+      - name: gcs-fuse-csi-inline-2
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: cal-cluster-input
+            mountOptions: "debug_fuse,debug_fs,debug_gcs,implicit-dirs,only-dir=results"

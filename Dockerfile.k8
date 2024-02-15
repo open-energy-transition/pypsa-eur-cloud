@@ -1,0 +1,17 @@
+FROM condaforge/mambaforge
+
+RUN conda update -n base conda
+RUN conda install -n base conda-libmamba-solver
+RUN conda config --set solver libmamba
+
+RUN mkdir config
+RUN mkdir results
+RUN mkdir pypsa-eur
+
+COPY . ./pypsa-eur/
+
+RUN conda env create -f pypsa-eur/envs/environment.yaml
+
+RUN echo "source activate pypsa-eur" > ~/.bashrc
+ENV PATH /opt/conda/envs/pypsa-eur/bin:$PATH
+
