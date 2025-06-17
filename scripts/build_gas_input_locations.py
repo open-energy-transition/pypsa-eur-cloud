@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -7,24 +6,29 @@ Build import locations for fossil gas from entry-points, LNG terminals and
 production sites with data from SciGRID_gas and Global Energy Monitor.
 """
 
+import json
 import logging
 
 import geopandas as gpd
 import pandas as pd
-from cluster_gas_network import load_bus_regions
+
+from scripts._helpers import configure_logging, set_scenario_config
+from scripts.cluster_gas_network import load_bus_regions
 
 logger = logging.getLogger(__name__)
 
 
 def read_scigrid_gas(fn):
     df = gpd.read_file(fn)
-    df = pd.concat([df, df.param.apply(pd.Series)], axis=1)
+    expanded_param = df.param.apply(json.loads).apply(pd.Series)
+    df = pd.concat([df, expanded_param], axis=1)
     df.drop(["param", "uncertainty", "method"], axis=1, inplace=True)
+    df = df.loc[:, ~df.columns.duplicated()]  # duplicated country_code column
     return df
 
 
 def build_gem_lng_data(fn):
-    df = pd.read_excel(fn[0], sheet_name="LNG terminals - data")
+    df = pd.read_excel(fn, sheet_name="LNG terminals - data")
     df = df.set_index("ComboID")
 
     remove_country = ["Cyprus", "Turkey"]  # noqa: F841
@@ -33,35 +37,42 @@ def build_gem_lng_data(fn):
         "Gran Canaria LNG Terminal",
     ]
 
+    status_list = ["Operating", "Construction"]  # noqa: F841
+
     df = df.query(
-        "Status != 'Cancelled' \
+        "Status in @status_list \
+              & FacilityType == 'Import' \
               & Country != @remove_country \
               & TerminalName != @remove_terminal \
-              & CapacityInMtpa != '--'"
+              & CapacityInMtpa != '--' \
+              & CapacityInMtpa != 0"
     )
 
     geometry = gpd.points_from_xy(df["Longitude"], df["Latitude"])
-    return gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    return gdf
 
 
 def build_gem_prod_data(fn):
-    df = pd.read_excel(fn[0], sheet_name="Gas extraction - main")
+    df = pd.read_excel(fn, sheet_name="Gas extraction - main")
     df = df.set_index("GEM Unit ID")
 
     remove_country = ["Cyprus", "Türkiye"]  # noqa: F841
     remove_fuel_type = ["oil"]  # noqa: F841
 
+    status_list = ["operating", "in development"]  # noqa: F841
+
     df = df.query(
-        "Status != 'shut in' \
+        "Status in @status_list \
               & 'Fuel type' != 'oil' \
               & Country != @remove_country \
               & ~Latitude.isna() \
               & ~Longitude.isna()"
     ).copy()
 
-    p = pd.read_excel(fn[0], sheet_name="Gas extraction - production")
+    p = pd.read_excel(fn, sheet_name="Gas extraction - production")
     p = p.set_index("GEM Unit ID")
-    p = p[p["Fuel description"] == "gas"]
+    p = p[p["Fuel description"].str.contains("gas", case=False)]
 
     capacities = pd.DataFrame(index=df.index)
     for key in ["production", "production design capacity", "reserves"]:
@@ -82,7 +93,8 @@ def build_gem_prod_data(fn):
     )
 
     geometry = gpd.points_from_xy(df["Longitude"], df["Latitude"])
-    return gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
+    return gdf
 
 
 def build_gas_input_locations(gem_fn, entry_fn, sto_fn, countries):
@@ -93,14 +105,20 @@ def build_gas_input_locations(gem_fn, entry_fn, sto_fn, countries):
     entry = read_scigrid_gas(entry_fn)
     entry["from_country"] = entry.from_country.str.rstrip()
     entry = entry.loc[
-        ~(entry.from_country.isin(countries) & entry.to_country.isin(countries))
-        & ~entry.name.str.contains("Tegelen")  # only take non-EU entries
-        | (entry.from_country == "NO")  # malformed datapoint  # entries from NO to GB
-    ]
+        (
+            ~(entry.from_country.isin(countries) & entry.to_country.isin(countries))
+            & (entry.from_country.isin(countries) | entry.to_country.isin(countries))
+            & ~entry.name.str.contains("Tegelen")  # only take non-EU entries
+            & ~entry.from_country.isin(
+                ["RU", "BY"]
+            )  # exclude entries from Russia and Belarus
+            | (entry.from_country == "NO")
+        )  # malformed datapoint
+    ].copy()
 
     sto = read_scigrid_gas(sto_fn)
     remove_country = ["RU", "UA", "TR", "BY"]  # noqa: F841
-    sto = sto.query("country_code not in @remove_country")
+    sto = sto.query("country_code not in @remove_country").copy()
 
     # production sites inside the model scope
     prod = build_gem_prod_data(gem_fn)
@@ -126,15 +144,15 @@ def build_gas_input_locations(gem_fn, entry_fn, sto_fn, countries):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_gas_input_locations",
-            simpl="",
-            clusters="128",
+            clusters="10",
         )
 
-    logging.basicConfig(level=snakemake.config["logging"]["level"])
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     regions = load_bus_regions(
         snakemake.input.regions_onshore, snakemake.input.regions_offshore
@@ -160,7 +178,7 @@ if __name__ == "__main__":
 
     gas_input_nodes = gpd.sjoin(gas_input_locations, regions, how="left")
 
-    gas_input_nodes.rename(columns={"index_right": "bus"}, inplace=True)
+    gas_input_nodes.rename(columns={"name": "bus"}, inplace=True)
 
     gas_input_nodes.to_file(snakemake.output.gas_input_nodes, driver="GeoJSON")
 

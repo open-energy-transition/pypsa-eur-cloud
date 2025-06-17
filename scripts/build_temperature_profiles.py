@@ -1,34 +1,52 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
 Build time series for air and soil temperatures per clustered model region.
+
+Uses ``atlite.Cutout.temperature`` and ``atlite.Cutout.soil_temperature compute temperature ambient air and soil temperature for the respective cutout. The rule is executed in ``build_sector.smk``.
+
+
+.. seealso::
+    `Atlite.Cutout.temperature <https://atlite.readthedocs.io/en/master/ref_api.html#module-atlite.convert>`_
+    `Atlite.Cutout.soil_temperature <https://atlite.readthedocs.io/en/master/ref_api.html#module-atlite.convert>`_
+
 """
 
-import atlite
+import logging
+
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 import xarray as xr
 from dask.distributed import Client, LocalCluster
 
+from scripts._helpers import (
+    configure_logging,
+    get_snapshots,
+    load_cutout,
+    set_scenario_config,
+)
+
+logger = logging.getLogger(__name__)
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_temperature_profiles",
-            simpl="",
             clusters=48,
         )
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     nprocesses = int(snakemake.threads)
     cluster = LocalCluster(n_workers=nprocesses, threads_per_worker=1)
     client = Client(cluster, asynchronous=True)
 
-    time = pd.date_range(freq="h", **snakemake.params.snapshots)
-    cutout = atlite.Cutout(snakemake.input.cutout).sel(time=time)
+    time = get_snapshots(snakemake.params.snapshots, snakemake.params.drop_leap_day)
+
+    cutout = load_cutout(snakemake.input.cutout, time=time)
 
     clustered_regions = (
         gpd.read_file(snakemake.input.regions_onshore).set_index("name").buffer(0)

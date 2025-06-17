@@ -1,31 +1,37 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2021-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
 Retrieve gas infrastructure data from
-https://zenodo.org/record/4767098/files/IGGIELGN.zip.
+https://zenodo.org/records/4767098/files/IGGIELGN.zip.
 """
 
 import logging
 import zipfile
 from pathlib import Path
 
-from _helpers import progress_retrieve, validate_checksum
+from scripts._helpers import (
+    configure_logging,
+    progress_retrieve,
+    set_scenario_config,
+    validate_checksum,
+)
 
 logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_gas_network_data")
         rootpath = ".."
     else:
         rootpath = "."
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
-    url = "https://zenodo.org/record/4767098/files/IGGIELGN.zip"
+    url = "https://zenodo.org/records/4767098/files/IGGIELGN.zip"
 
     # Save locations
     zip_fn = Path(f"{rootpath}/IGGIELGN.zip")

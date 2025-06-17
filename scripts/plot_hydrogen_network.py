@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2024 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -13,9 +12,11 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 import pypsa
-from _helpers import configure_logging
-from plot_power_network import assign_location, load_projection
 from pypsa.plot import add_legend_circles, add_legend_lines, add_legend_patches
+
+from scripts._helpers import configure_logging, retry, set_scenario_config
+from scripts.make_summary import assign_locations
+from scripts.plot_power_network import load_projection
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ def group_pipes(df, drop_direction=False):
     """
     Group pipes which connect same buses and return overall capacity.
     """
+    df = df.copy()
     if drop_direction:
         positive_order = df.bus0 < df.bus1
         df_p = df[positive_order]
@@ -32,20 +34,22 @@ def group_pipes(df, drop_direction=False):
         df = pd.concat([df_p, df_n])
 
     # there are pipes for each investment period rename to AC buses name for plotting
+    df["index_orig"] = df.index
     df.index = df.apply(
         lambda x: f"H2 pipeline {x.bus0.replace(' H2', '')} -> {x.bus1.replace(' H2', '')}",
         axis=1,
     )
     return df.groupby(level=0).agg(
-        {"p_nom_opt": "sum", "bus0": "first", "bus1": "first"}
+        {"p_nom_opt": "sum", "bus0": "first", "bus1": "first", "index_orig": "first"}
     )
 
 
+@retry
 def plot_h2_map(n, regions):
     # if "H2 pipeline" not in n.links.carrier.unique():
     #     return
 
-    assign_location(n)
+    assign_locations(n)
 
     h2_storage = n.stores.query("carrier == 'H2'")
     regions["H2"] = (
@@ -95,24 +99,27 @@ def plot_h2_map(n, regions):
             )
 
     if not h2_retro.empty:
-        positive_order = h2_retro.bus0 < h2_retro.bus1
-        h2_retro_p = h2_retro[positive_order]
-        swap_buses = {"bus0": "bus1", "bus1": "bus0"}
-        h2_retro_n = h2_retro[~positive_order].rename(columns=swap_buses)
-        h2_retro = pd.concat([h2_retro_p, h2_retro_n])
+        if snakemake.params.foresight != "myopic":
+            positive_order = h2_retro.bus0 < h2_retro.bus1
+            h2_retro_p = h2_retro[positive_order]
+            swap_buses = {"bus0": "bus1", "bus1": "bus0"}
+            h2_retro_n = h2_retro[~positive_order].rename(columns=swap_buses)
+            h2_retro = pd.concat([h2_retro_p, h2_retro_n])
 
-        h2_retro["index_orig"] = h2_retro.index
-        h2_retro.index = h2_retro.apply(
-            lambda x: f"H2 pipeline {x.bus0.replace(' H2', '')} -> {x.bus1.replace(' H2', '')}",
-            axis=1,
-        )
+            h2_retro["index_orig"] = h2_retro.index
+            h2_retro.index = h2_retro.apply(
+                lambda x: f"H2 pipeline {x.bus0.replace(' H2', '')} -> {x.bus1.replace(' H2', '')}",
+                axis=1,
+            )
 
         retro_w_new_i = h2_retro.index.intersection(h2_new.index)
         h2_retro_w_new = h2_retro.loc[retro_w_new_i]
 
         retro_wo_new_i = h2_retro.index.difference(h2_new.index)
         h2_retro_wo_new = h2_retro.loc[retro_wo_new_i]
-        h2_retro_wo_new.index = h2_retro_wo_new.index_orig
+        h2_retro_wo_new.index = h2_retro_wo_new.index_orig.apply(
+            lambda x: x.split("-2")[0]
+        )
 
         to_concat = [h2_new, h2_retro_w_new, h2_retro_wo_new]
         h2_total = pd.concat(to_concat).p_nom_opt.groupby(level=0).sum()
@@ -123,7 +130,12 @@ def plot_h2_map(n, regions):
     link_widths_total = h2_total / linewidth_factor
 
     n.links.rename(index=lambda x: x.split("-2")[0], inplace=True)
-    n.links = n.links.groupby(level=0).first()
+    # group links by summing up p_nom values and taking the first value of the rest of the columns
+    other_cols = dict.fromkeys(n.links.columns.drop(["p_nom_opt", "p_nom"]), "first")
+    n.links = n.links.groupby(level=0).agg(
+        {"p_nom_opt": "sum", "p_nom": "sum", **other_cols}
+    )
+
     link_widths_total = link_widths_total.reindex(n.links.index).fillna(0.0)
     link_widths_total[n.links.p_nom_opt < line_lower_threshold] = 0.0
 
@@ -238,22 +250,22 @@ def plot_h2_map(n, regions):
     ax.set_facecolor("white")
 
     fig.savefig(snakemake.output.map, bbox_inches="tight")
+    plt.close(fig)
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "plot_hydrogen_network",
-            simpl="",
             opts="",
             clusters="37",
-            ll="v1.0",
             sector_opts="4380H-T-H-B-I-A-dist1",
         )
 
     configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     n = pypsa.Network(snakemake.input.network)
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020 @JanFrederickUnnewehr, 2020-2024 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -8,39 +7,15 @@ This rule downloads the load data from `Open Power System Data Time series
 the network, the per country load timeseries are extracted from the dataset.
 After filling small gaps linearly and large gaps by copying time-slice of a
 given period, the load data is exported to a ``.csv`` file.
-
-Relevant Settings
------------------
-
-.. code:: yaml
-
-    snapshots:
-
-    load:
-        interpolate_limit: time_shift_for_large_gaps: manual_adjustments:
-
-
-.. seealso::
-    Documentation of the configuration file ``config/config.yaml`` at
-    :ref:`load_cf`
-
-Inputs
-------
-
-- ``data/electricity_demand_raw.csv``:
-
-Outputs
--------
-
-- ``resources/electricity_demand.csv``:
 """
 
 import logging
 
 import numpy as np
 import pandas as pd
-from _helpers import configure_logging
 from pandas import Timedelta as Delta
+
+from scripts._helpers import configure_logging, get_snapshots, set_scenario_config
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +69,7 @@ def fill_large_gaps(ds, shift):
     nhours = shift / np.timedelta64(1, "h")
     if (consecutive_nans(ds) > nhours).any():
         logger.warning(
-            "There exist gaps larger then the time shift used for "
-            "copying time slices."
+            "There exist gaps larger then the time shift used for copying time slices."
         )
     time_shift = pd.Series(ds.values, ds.index + shift)
     return ds.where(ds.notnull(), time_shift.reindex_like(ds))
@@ -129,7 +103,7 @@ def copy_timeslice(load, cntry, start, stop, delta, fn_load=None):
             load.loc[start:stop, cntry] = load.loc[
                 start - delta : stop - delta, cntry
             ].values
-        elif fn_load is not None:
+        elif fn_load is not None and cntry in load:
             duration = pd.date_range(freq="h", start=start - delta, end=stop - delta)
             load_raw = load_timeseries(fn_load, duration, [cntry])
             load.loc[start:stop, cntry] = load_raw.loc[
@@ -163,15 +137,15 @@ def manual_adjustment(load, fn_load, countries):
     electricity consumption data from Croatia (HR) for the year 2019, scaled by the
     factors derived from https://energy.at-site.be/eurostat-2021/
 
-     Parameters
-     ----------
+    Parameters
+    ----------
      load : pd.DataFrame
          Load time-series with UTC timestamps x ISO-2 countries
     load_fn: str
          File name or url location (file format .csv)
 
-     Returns
-     -------
+    Returns
+    -------
      load : pd.DataFrame
          Manual adjusted and interpolated load time-series with UTC
          timestamps x ISO-2 countries
@@ -183,7 +157,7 @@ def manual_adjustment(load, fn_load, countries):
         elif "MK" in load:
             load["AL"] = load["MK"] * (4.1 / 7.4)
 
-    if "MK" in countries:
+    if "MK" in countries and "MK" in countries:
         if "MK" not in load or load.MK.isnull().sum() > len(load) / 2:
             if "ME" in load:
                 load["MK"] = load.ME * (6.7 / 2.9)
@@ -192,9 +166,9 @@ def manual_adjustment(load, fn_load, countries):
         if "ME" in load:
             load["BA"] = load.HR * (11.0 / 16.2)
 
-    if "KV" not in load or load.KV.isnull().values.all():
+    if "XK" not in load and "XK" in countries:
         if "RS" in load:
-            load["KV"] = load["RS"] * (4.8 / 27.0)
+            load["XK"] = load["RS"] * (4.8 / 27.0)
 
     copy_timeslice(load, "GR", "2015-08-11 21:00", "2015-08-15 20:00", Delta(weeks=1))
     copy_timeslice(load, "AT", "2018-12-31 22:00", "2019-01-01 22:00", Delta(days=2))
@@ -256,28 +230,40 @@ def manual_adjustment(load, fn_load, countries):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_electricity_demand")
 
     configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
-    interpolate_limit = snakemake.params.load["interpolate_limit"]
+    snapshots = get_snapshots(
+        snakemake.params.snapshots, snakemake.params.drop_leap_day
+    )
+
+    fixed_year = snakemake.params["load"].get("fixed_year", False)
+    years = (
+        slice(str(fixed_year), str(fixed_year))
+        if fixed_year
+        else slice(snapshots[0], snapshots[-1])
+    )
+
+    interpolate_limit = snakemake.params.load["fill_gaps"]["interpolate_limit"]
     countries = snakemake.params.countries
-    snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
-    years = slice(snapshots[0], snapshots[-1])
-    time_shift = snakemake.params.load["time_shift_for_large_gaps"]
 
-    load = load_timeseries(snakemake.input[0], years, countries)
+    time_shift = snakemake.params.load["fill_gaps"]["time_shift_for_large_gaps"]
+
+    load = load_timeseries(snakemake.input.reported, years, countries)
+
+    load = load.reindex(index=snapshots)
 
     if "UA" in countries:
         # attach load of UA (best data only for entsoe transparency)
-        load_ua = load_timeseries(snakemake.input[0], "2018", ["UA"], False)
+        load_ua = load_timeseries(snakemake.input.reported, "2018", ["UA"])
         snapshot_year = str(snapshots.year.unique().item())
         time_diff = pd.Timestamp("2018") - pd.Timestamp(snapshot_year)
-        load_ua.index -= (
-            time_diff  # hack indices (currently, UA is manually set to 2018)
-        )
+        # hack indices (currently, UA is manually set to 2018)
+        load_ua.index -= time_diff
         load["UA"] = load_ua
         # attach load of MD (no time-series available, use 2020-totals and distribute according to UA):
         # https://www.iea.org/data-and-statistics/data-browser/?country=MOLDOVA&fuel=Energy%20consumption&indicator=TotElecCons
@@ -287,21 +273,32 @@ if __name__ == "__main__":
     if snakemake.params.load["manual_adjustments"]:
         load = manual_adjustment(load, snakemake.input[0], countries)
 
-    if load.empty:
-        logger.warning("Build electricity demand time series is empty.")
+    if snakemake.params.load["fill_gaps"]["enable"]:
+        logger.info(f"Linearly interpolate gaps of size {interpolate_limit} and less.")
+        load = load.interpolate(method="linear", limit=interpolate_limit)
 
-    logger.info(f"Linearly interpolate gaps of size {interpolate_limit} and less.")
-    load = load.interpolate(method="linear", limit=interpolate_limit)
+        logger.info(
+            f"Filling larger gaps by copying time-slices of period '{time_shift}'."
+        )
+        load = load.apply(fill_large_gaps, shift=time_shift)
 
-    logger.info(
-        "Filling larger gaps by copying time-slices of period " f"'{time_shift}'."
-    )
-    load = load.apply(fill_large_gaps, shift=time_shift)
+    if snakemake.params.load["supplement_synthetic"]:
+        logger.info("Supplement missing data with synthetic data.")
+        fn = snakemake.input.synthetic
+        synthetic_load = pd.read_csv(fn, index_col=0, parse_dates=True)
+        # UA, MD, XK do not appear in synthetic load data
+        countries = list(set(countries) - set(["UA", "MD", "XK"]))
+        synthetic_load = synthetic_load.loc[snapshots, countries]
+        load = load.combine_first(synthetic_load)
 
     assert not load.isna().any().any(), (
         "Load data contains nans. Adjust the parameters "
         "`time_shift_for_large_gaps` or modify the `manual_adjustment` function "
         "for implementing the needed load data modifications."
     )
+
+    # need to reindex load time series to target year
+    if fixed_year:
+        load.index = load.index.map(lambda t: t.replace(year=snapshots.year[0]))
 
     load.to_csv(snakemake.output[0])

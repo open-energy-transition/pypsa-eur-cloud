@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -66,8 +64,15 @@ The script has the following structure:
     (4) get cost savings per retrofitting measures for each sector by weighting
         with heated floor area
 """
+
+import logging
+
 import pandas as pd
 import xarray as xr
+
+from scripts._helpers import configure_logging, set_scenario_config
+
+logger = logging.getLogger(__name__)
 
 # (i) --- FIXED PARAMETER / STANDARD VALUES -----------------------------------
 
@@ -128,11 +133,12 @@ l_strength = ["0.07", "0.075", "0.08", "0.1", "0.15", "0.22", "0.24", "0.26"]
 
 def get_average_temperature_during_heating_season(temperature, t_threshold=15):
     """
-    returns average temperature during heating season
+    Returns average temperature during heating season
     input:
         temperature : pd.Series(Index=time, values=temperature)
         t_threshold : threshold temperature for heating degree days (HDD)
-    returns:
+
+    Returns:
         average temperature
     """
     t_average_daily = temperature.resample("1D").mean()
@@ -141,7 +147,7 @@ def get_average_temperature_during_heating_season(temperature, t_threshold=15):
 
 def prepare_building_stock_data():
     """
-    reads building stock data and cleans up the format, returns
+    Reads building stock data and cleans up the format, returns
     --------
     u_values:          pd.DataFrame current U-values
     area_tot:          heated floor area per country and sector [Mm²]
@@ -197,6 +203,7 @@ def prepare_building_stock_data():
             "Iceland": "IS",
             "Montenegro": "ME",
             "Serbia": "RS",
+            "Kosovo": "XK",
             "Albania": "AL",
             "United Kingdom": "GB",
             "Bosnia and Herzegovina": "BA",
@@ -253,7 +260,7 @@ def prepare_building_stock_data():
         index = pd.MultiIndex.from_product([[ct], averaged_data.index.to_list()])
         averaged_data.index = index
         averaged_data["estimated"] = 1
-        if ct not in area_tot.index.levels[0]:
+        if ct not in area_tot.index.unique(0):
             area_tot = pd.concat([area_tot, averaged_data], sort=True)
         else:
             area_tot.loc[averaged_data.index] = averaged_data
@@ -364,11 +371,11 @@ def prepare_building_topology(u_values, same_building_topology=True):
 
     # get total area of building components
     for element in building_elements:
-        elements = ["A_{}_1".format(element), "A_{}_2".format(element)]
+        elements = [f"A_{element}_1", f"A_{element}_2"]
         data_tabula = pd.concat(
             [
                 data_tabula.drop(elements, axis=1),
-                data_tabula[elements].sum(axis=1).rename("A_{}".format(element)),
+                data_tabula[elements].sum(axis=1).rename(f"A_{element}"),
             ],
             axis=1,
         )
@@ -466,7 +473,7 @@ def prepare_building_topology(u_values, same_building_topology=True):
 
     # total buildings envelope surface [m^2]
     data_tabula["A_envelope"] = data_tabula[
-        ["A_{}".format(element) for element in building_elements]
+        [f"A_{element}" for element in building_elements]
     ].sum(axis=1)
 
     return data_tabula
@@ -889,7 +896,7 @@ def calculate_gain_utilisation_factor(heat_transfer_perm2, Q_ht, Q_gain):
     Calculates gain utilisation factor nu.
     """
     # time constant of the building tau [h] = c_m [Wh/(m^2K)] * 1 /(H_tr_e+H_tb*H_ve) [m^2 K /W]
-    tau = c_m / heat_transfer_perm2.T.groupby(axis=1).sum().T
+    tau = c_m / heat_transfer_perm2.groupby().sum()
     alpha = alpha_H_0 + (tau / tau_H_0)
     # heat balance ratio
     gamma = (1 / Q_ht).mul(Q_gain.sum(axis=1), axis=0)
@@ -1041,18 +1048,17 @@ def sample_dE_costs_area(
     return cost_dE_new, area_tot
 
 
-# %% --- MAIN --------------------------------------------------------------
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "build_retro_cost",
-            simpl="",
             clusters=48,
-            ll="v1.0",
             sector_opts="Co2L0-168H-T-H-B-I-solar3-dist1",
         )
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     #  ********  config  *********************************************************
 
@@ -1071,6 +1077,7 @@ if __name__ == "__main__":
         "AL": ["BG", "RO", "GR"],
         "BA": ["HR"],
         "RS": ["BG", "RO", "HR", "HU"],
+        "KV": ["RS"],
         "MK": ["BG", "GR"],
         "ME": ["BA", "AL", "RS", "HR"],
         "CH": ["SE", "DE"],

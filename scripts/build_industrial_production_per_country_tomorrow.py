@@ -1,19 +1,53 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
 Build future industrial production per country.
+
+Description
+-------
+
+This rule uses the ``industrial_production_per_country.csv`` file and the expected recycling rates to calculate the future production of the industrial sectors.
+
+**St_primary_fraction**
+The fraction of steel that is coming from primary production. This is more energy intensive than recycling steel (secondary production).
+
+**DRI_fraction**
+The fraction of primary steel that is produced in DRI plants.
+
+**Al_primary_fraction**
+The fraction of aluminium that is coming from primary production. This is more energy intensive than recycling aluminium (secondary production).
+
+**HVC_primary_fraction**
+The fraction of high value chemicals that are coming from primary production (crude oil or Fischer Tropsch).
+
+**HVC_mechanical_recycling_fraction**
+The fraction of high value chemicals that are coming from mechanical recycling.
+
+**HVC_chemical_recycling_fraction**
+The fraction of high value chemicals that are coming from chemical recycling.
+
+If not already present, the information is added as new column in the output file.
+
+The unit of the production is kt/a.
 """
 
+import logging
+
 import pandas as pd
-from prepare_sector_network import get
+
+from scripts._helpers import configure_logging, set_scenario_config
+from scripts.prepare_sector_network import get
+
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_industrial_production_per_country_tomorrow")
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     params = snakemake.params.industry
 

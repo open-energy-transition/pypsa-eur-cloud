@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2019-2023 The PyPSA-Eur Authors
+  SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -9,14 +9,52 @@
 Configuration
 ##########################################
 
-PyPSA-Eur has several configuration options which are documented in this section and are collected in a ``config/config.yaml`` file. This file defines deviations from the default configuration (``config/config.default.yaml``); confer installation instructions at :ref:`defaultconfig`.
+PyPSA-Eur has several configuration options which are documented in this section.
+
+.. _defaultconfig:
+
+Configuration Files
+===================
+
+Any PyPSA-Eur configuration can be set in a ``.yaml`` file. The default configurations 
+``config/config.default.yaml`` and ``config/plotting.default.yaml`` are maintained in 
+the repository and cover all the options that are used/ can be set.
+
+To pass your own configuration, you can create a new file, e.g. ``my_config.yaml``, 
+and specify the options you want to change. They will override the default settings and 
+options which are not set, will be inherited from the defaults above.
+
+Another way is to use the ``config/config.yaml`` file, which does not exist in the 
+repository and is also not tracked by git. But snakemake will always use this file if 
+it exists. This way you can run snakemake with a custom config without having to 
+specify the config file each time.
+
+Configuration order of precedence is as follows:
+1. Command line options specified with ``--config`` (optional)
+2. Custom configuration file specified with ``--configfile`` (optional)
+3. The ``config/config.yaml`` file (optional)
+4. The default configuration files ``config/config.default.yaml`` and ``config/plotting.default.yaml``
+
+To use your custom configuration file, you need to pass it to the ``snakemake`` command 
+using the ``--configfile`` option:
+
+.. code:: console
+
+    $ snakemake -call --configfile my_config.yaml
+
+.. warning::
+
+    In a previous version of PyPSA-Eur (``<=2025.04.0``), a full copy of the created config
+    was stored in the ``config/config.yaml`` file. This is no longer the case. If the 
+    file exists, snakemake will use it, but no new copy will be created.
+
 
 .. _toplevel_cf:
 
 Top-level configuration
 =======================
 
-"Private" refers to local, machine-specific settings or data meant for personal use, not to be shared. "Remote" indicates the address of a server used for data exchange, often for clusters and data pushing/pulling.
+"Remote" indicates the address of a server used for data exchange, often for clusters and data pushing/pulling.
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
@@ -31,7 +69,7 @@ Top-level configuration
 .. _run_cf:
 
 ``run``
-=======
+=============
 
 It is common conduct to analyse energy system optimisation models for **multiple scenarios** for a variety of reasons,
 e.g. assessing their sensitivity towards changing the temporal and/or geographical resolution or investigating how
@@ -77,22 +115,22 @@ The ``scenario`` section is an extraordinary section of the config file
 that is strongly connected to the :ref:`wildcards` and is designed to
 facilitate running multiple scenarios through a single command
 
-.. code:: bash
+.. code:: console
 
    # for electricity-only studies
-   snakemake -call solve_elec_networks
+   $ snakemake -call solve_elec_networks
 
    # for sector-coupling studies
-   snakemake -call solve_sector_networks
+   $ snakemake -call solve_sector_networks
 
 For each wildcard, a **list of values** is provided. The rule
 ``solve_all_elec_networks`` will trigger the rules for creating
-``results/networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc`` for **all
+``results/networks/base_s_{clusters}_elec_{opts}.nc`` for **all
 combinations** of the provided wildcard values as defined by Python's
 `itertools.product(...)
-<https://docs.python.org/2/library/itertools.html#itertools.product>`_ function
+<https://docs.python.org/2/library/itertools.html#itertools.product>`__ function
 that snakemake's `expand(...) function
-<https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets>`_
+<https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#targets>`__
 uses.
 
 An exemplary dependency graph (starting from the simplification rules) then looks like this:
@@ -129,7 +167,7 @@ An exemplary dependency graph (starting from the simplification rules) then look
 ``snapshots``
 =============
 
-Specifies the temporal range to build an energy system model for as arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`_
+Specifies the temporal range to build an energy system model for as arguments to `pandas.date_range <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.date_range.html>`__
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
@@ -150,7 +188,7 @@ Switches for some rules and optional features.
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
-   :start-at: enable:
+   :start-after: #enable
    :end-before: # docs
 
 .. csv-table::
@@ -174,7 +212,7 @@ Switches for some rules and optional features.
    :file: configtables/co2_budget.csv
 
 .. note::
-    this parameter is over-ridden if ``CO2Lx`` or ``cb`` is set in
+    this parameter is over-ridden if ``Co2Lx`` or ``cb`` is set in
     sector_opts.
 
 .. _electricity_cf:
@@ -197,7 +235,7 @@ Switches for some rules and optional features.
 ``atlite``
 ==========
 
-Define and specify the ``atlite.Cutout`` used for calculating renewable potentials and time-series. All options except for ``features`` are directly used as `cutout parameters <https://atlite.readthedocs.io/en/latest/ref_api.html#cutout>`_.
+Define and specify the ``atlite.Cutout`` used for calculating renewable potentials and time-series. All options except for ``features`` are directly used as `cutout parameters <https://atlite.readthedocs.io/en/latest/ref_api.html#cutout>`__.
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
@@ -236,18 +274,18 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    The default choice for corine ``grid_codes`` was based on Scholz, Y. (2012). Renewable energy based electricity supply at low costs
    development of the REMix model and application for Europe. ( p.42 / p.28)
 
-``offwind-ac``
+``offwind-x``
 --------------
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
    :start-at:   offwind-ac:
-   :end-before:   offwind-dc:
+   :end-before:   solar:
 
 .. csv-table::
    :header-rows: 1
    :widths: 22,7,22,33
-   :file: configtables/offwind-ac.csv
+   :file: configtables/offwind.csv
 
 .. note::
    Notes on ``capacity_per_sqkm``. ScholzPhd Tab 4.3.1: 10MW/km^2 and assuming 20% fraction of the already restricted
@@ -258,23 +296,6 @@ Define and specify the ``atlite.Cutout`` used for calculating renewable potentia
    Notes on ``correction_factor``. Correction due to proxy for wake losses
    from 10.1016/j.energy.2018.08.153
    until done more rigorously in #153
-
-``offwind-dc``
----------------
-
-.. literalinclude:: ../config/config.default.yaml
-   :language: yaml
-   :start-at:   offwind-dc:
-   :end-before:   solar:
-
-.. csv-table::
-   :header-rows: 1
-   :widths: 22,7,22,33
-   :file: configtables/offwind-dc.csv
-
-.. note::
-   both ``offwind-ac`` and ``offwind-dc`` have the same assumption on
-   ``capacity_per_sqkm`` and ``correction_factor``.
 
 ``solar``
 ---------------
@@ -363,6 +384,23 @@ overwrite the existing values.
 
 .. _transformers_cf:
 
+``transmission projects``
+=========================
+
+Allows to define additional transmission projects that will be added to the base network, e.g., from the TYNDP 2020 dataset. The projects are read in from the CSV files in the subfolder of ``data/transmission_projects/``. New transmission projects, e.g. from TYNDP 2024, can be added in a new subfolder of transmission projects, e.g. ``data/transmission_projects/tyndp2024`` while extending the list of ``transmission_projects`` in the ``config.yaml`` by ``tyndp2024``. The CSV files in the project folder should have the same columns as the CSV files in the template folder ``data/transmission_projects/template``.
+
+.. literalinclude:: ../config/config.default.yaml
+   :language: yaml
+   :start-at: transmission_projects:
+   :end-before: # docs
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 22,7,22,33
+   :file: configtables/transmission_projects.csv
+
+.. _transformers_cf:
+
 ``transformers``
 ================
 
@@ -427,7 +465,7 @@ overwrite the existing values.
    :widths: 22,7,22,33
    :file: configtables/biomass.csv
 
-The list of available biomass is given by the category in `ENSPRESO_BIOMASS <https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx>`_, namely:
+The list of available biomass is given by the category in `ENSPRESO_BIOMASS <https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx>`__, namely:
 
 - Agricultural waste
 - Manure solid, liquid
@@ -511,7 +549,7 @@ The list of available biomass is given by the category in `ENSPRESO_BIOMASS <htt
 
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
-   :start-at: industry:
+   :start-at: # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#industry
    :end-before: # docs
 
 .. csv-table::
@@ -534,9 +572,6 @@ The list of available biomass is given by the category in `ENSPRESO_BIOMASS <htt
    :widths: 22,7,22,33
    :file: configtables/costs.csv
 
-.. note::
-   ``rooftop_share:`` are based on the potentials, assuming
-   (0.1 kW/m2 and 10 m2/person)
 
 .. _clustering_cf:
 
@@ -553,13 +588,23 @@ The list of available biomass is given by the category in `ENSPRESO_BIOMASS <htt
    :widths: 22,7,22,33
    :file: configtables/clustering.csv
 
-.. note::
-   ``feature:`` in ``simplify_network:``
-   are only relevant if ``hac`` were chosen in ``algorithm``.
-
 .. tip::
-   use ``min`` in ``p_nom_max:`` for more `
-   conservative assumptions.
+   use ``min`` in ``p_nom_max:`` for more conservative assumptions.
+
+.. _adjustments_cf:
+
+``adjustments``
+===============
+
+.. literalinclude:: ../config/config.default.yaml
+   :language: yaml
+   :start-at: adjustments:
+   :end-before: # docs
+
+.. csv-table::
+   :header-rows: 1
+   :widths: 22,7,22,33
+   :file: configtables/adjustments.csv
 
 .. _solving_cf:
 
@@ -569,7 +614,6 @@ The list of available biomass is given by the category in `ENSPRESO_BIOMASS <htt
 .. literalinclude:: ../config/config.default.yaml
    :language: yaml
    :start-at: solving:
-   :end-before: # docs
 
 .. csv-table::
    :header-rows: 1
@@ -581,10 +625,7 @@ The list of available biomass is given by the category in `ENSPRESO_BIOMASS <htt
 ``plotting``
 =============
 
-.. warning::
-   More comprehensive documentation for this segment will be released soon.
-
-.. literalinclude:: ../config/config.default.yaml
+.. literalinclude:: ../config/plotting.default.yaml
    :language: yaml
    :start-at: plotting:
 

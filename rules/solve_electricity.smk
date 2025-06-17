@@ -1,36 +1,35 @@
-# SPDX-FileCopyrightText: : 2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 
 
 rule solve_network:
     params:
-        solving=config["solving"],
-        foresight=config["foresight"],
-        planning_horizons=config["scenario"]["planning_horizons"],
-        co2_sequestration_potential=config["sector"].get(
-            "co2_sequestration_potential", 200
+        solving=config_provider("solving"),
+        foresight=config_provider("foresight"),
+        co2_sequestration_potential=config_provider(
+            "sector", "co2_sequestration_potential", default=200
         ),
         custom_extra_functionality=input_custom_extra_functionality,
     input:
-        network=RESOURCES + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
-        config=RESULTS + "config.yaml",
+        network=resources("networks/base_s_{clusters}_elec_{opts}.nc"),
     output:
-        network=RESULTS + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        network=RESULTS + "networks/base_s_{clusters}_elec_{opts}.nc",
+        config=RESULTS + "configs/config.base_s_{clusters}_elec_{opts}.yaml",
     log:
         solver=normpath(
-            LOGS + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_solver.log"
+            RESULTS + "logs/solve_network/base_s_{clusters}_elec_{opts}_solver.log"
         ),
-        python=LOGS
-        + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_python.log",
+        memory=RESULTS + "logs/solve_network/base_s_{clusters}_elec_{opts}_memory.log",
+        python=RESULTS + "logs/solve_network/base_s_{clusters}_elec_{opts}_python.log",
     benchmark:
-        BENCHMARKS + "solve_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
+        (RESULTS + "benchmarks/solve_network/base_s_{clusters}_elec_{opts}")
     threads: solver_threads
     resources:
         mem_mb=memory,
-        walltime=config["solving"].get("walltime", "12:00:00"),
+        runtime=config_provider("solving", "runtime", default="6h"),
     shadow:
-        "minimal"
+        shadow_config
     conda:
         "../envs/environment.yaml"
     script:
@@ -39,29 +38,32 @@ rule solve_network:
 
 rule solve_operations_network:
     params:
-        options=config["solving"]["options"],
+        options=config_provider("solving", "options"),
+        solving=config_provider("solving"),
+        foresight=config_provider("foresight"),
+        co2_sequestration_potential=config_provider(
+            "sector", "co2_sequestration_potential", default=200
+        ),
+        custom_extra_functionality=input_custom_extra_functionality,
     input:
-        network=RESULTS + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc",
+        network=RESULTS + "networks/base_s_{clusters}_elec_{opts}.nc",
     output:
-        network=RESULTS + "networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_op.nc",
+        network=RESULTS + "networks/base_s_{clusters}_elec_{opts}_op.nc",
     log:
         solver=normpath(
-            LOGS
-            + "solve_operations_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_op_solver.log"
+            RESULTS
+            + "logs/solve_operations_network/base_s_{clusters}_elec_{opts}_op_solver.log"
         ),
-        python=LOGS
-        + "solve_operations_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}_op_python.log",
+        python=RESULTS
+        + "logs/solve_operations_network/base_s_{clusters}_elec_{opts}_op_python.log",
     benchmark:
-        (
-            BENCHMARKS
-            + "solve_operations_network/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}"
-        )
+        (RESULTS + "benchmarks/solve_operations_network/base_s_{clusters}_elec_{opts}")
     threads: 4
     resources:
-        mem_mb=(lambda w: 10000 + 372 * int(w.clusters)),
-        walltime=config["solving"].get("walltime", "12:00:00"),
+        mem_mb=memory,
+        runtime=config_provider("solving", "runtime", default="6h"),
     shadow:
-        "minimal"
+        shadow_config
     conda:
         "../envs/environment.yaml"
     script:

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: 2023-2024 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -10,19 +9,20 @@ import logging
 
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+from scripts._helpers import configure_logging, set_scenario_config
 
-from _helpers import configure_logging
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("retrieve_electricity_demand")
         rootpath = ".."
     else:
         rootpath = "."
     configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     url = "https://data.open-power-system-data.org/time_series/{version}/time_series_60min_singleindex.csv"
 

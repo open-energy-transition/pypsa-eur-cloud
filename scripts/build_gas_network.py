@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -7,12 +6,15 @@ Preprocess gas network based on data from bthe SciGRID_gas project
 (https://www.gas.scigrid.de/).
 """
 
+import json
 import logging
 
 import geopandas as gpd
 import pandas as pd
 from pypsa.geo import haversine_pts
 from shapely.geometry import Point
+
+from scripts._helpers import configure_logging, set_scenario_config
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +55,9 @@ def diameter_to_capacity(pipe_diameter_mm):
 
 def load_dataset(fn):
     df = gpd.read_file(fn)
-    param = df.param.apply(pd.Series)
-    method = df.method.apply(pd.Series)[["diameter_mm", "max_cap_M_m3_per_d"]]
+    param = df.param.apply(json.loads).apply(pd.Series)
+    cols = ["diameter_mm", "max_cap_M_m3_per_d"]
+    method = df.method.apply(json.loads).apply(pd.Series)[cols]
     method.columns = method.columns + "_method"
     df = pd.concat([df, param, method], axis=1)
     to_drop = ["param", "uncertainty", "method", "tags"]
@@ -139,11 +142,12 @@ def prepare_dataset(
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_gas_network")
 
-    logging.basicConfig(level=snakemake.config["logging"]["level"])
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     gas_network = load_dataset(snakemake.input.gas_network)
 

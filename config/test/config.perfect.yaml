@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: : 2017-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -7,18 +7,17 @@ tutorial: true
 run:
   name: "test-sector-perfect"
   disable_progressbar: true
-  shared_resources: "test"
+  shared_resources:
+    policy: false
   shared_cutouts: true
 
 foresight: perfect
 
 scenario:
-  ll:
-  - v1.0
   clusters:
   - 5
   sector_opts:
-  - 8760h-T-H-B-I-A-dist1
+  - ''
   planning_horizons:
   - 2030
   - 2040
@@ -31,7 +30,6 @@ snapshots:
   end: "2013-03-08"
 
 electricity:
-  co2limit: 100.e+6
 
   extendable_carriers:
     Generator: [OCGT]
@@ -39,11 +37,21 @@ electricity:
     Store: [H2]
     Link: [H2 pipeline]
 
-  renewable_carriers: [solar, onwind, offwind-ac, offwind-dc]
+  renewable_carriers: [solar, solar-hsat, onwind, offwind-ac, offwind-dc, offwind-float]
 
 sector:
   min_part_load_fischer_tropsch: 0
   min_part_load_methanolisation: 0
+  solid_biomass_import:
+    enable: true
+  district_heating:
+    ptes:
+      supplemental_heating:
+        enable: true
+        booster_heat_pump: true
+    ates:
+      enable: true
+
 
 atlite:
   default_cutout: be-03-2013-era5
@@ -55,16 +63,17 @@ atlite:
       time: ["2013-03-01", "2013-03-08"]
 
 renewable:
-  onwind:
-    cutout: be-03-2013-era5
   offwind-ac:
-    cutout: be-03-2013-era5
     max_depth: false
   offwind-dc:
-    cutout: be-03-2013-era5
     max_depth: false
-  solar:
-    cutout: be-03-2013-era5
+  offwind-float:
+    max_depth: false
+    min_depth: false
+
+clustering:
+  temporal:
+    resolution_sector: 8760h
 
 industry:
   St_primary_fraction:
@@ -75,9 +84,13 @@ industry:
 
 solving:
   solver:
-    name: glpk
-    options: glpk-default
+    name: highs
+    options: highs-simplex
   mem: 4000
+
+  check_objective:
+    enable: false
+    expected_value: 1.3778753459e+10
 
 plotting:
   map:

@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2023 The PyPSA-Eur Authors
+  SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -7,8 +7,15 @@
 Building Sector-Coupled Networks
 ##########################################
 
-.. warning::
-  This part of the documentation is under development.
+The preparation process of the sector-coupled version of the PyPSA-Eur energy system model consists of a group of ``snakemake`` rules which are briefly outlined and explained in detail in the sections below.
+
+Not all data dependencies are shipped with the git repository.
+Instead we provide separate data bundles which can be obtained
+using the ``retrieve*`` rules (:ref:`data`).
+Having downloaded the necessary data,
+
+- :mod:`add_brownfield` builds and stores the base network with all buses, HVAC lines and HVDC links, while
+
 
 Rule ``add_brownfield``
 ==============================================================================
@@ -36,6 +43,11 @@ Rule ``build_biomass_potentials``
 
 .. automodule:: build_biomass_potentials
 
+Rule ``build_egs_potentials``
+==============================================================================
+
+.. automodule:: build_egs_potentials
+
 Rule ``build_biomass_transport_costs``
 ==============================================================================
 
@@ -46,15 +58,50 @@ Rule ``build_clustered_population_layouts``
 
 .. automodule:: build_clustered_population_layouts
 
+Rule ``build_simplified_population_layouts``
+==============================================================================
+
+.. automodule:: build_simplified_population_layouts
+
+Rule ``build_clustered_solar_rooftop_potentials``
+==============================================================================
+
+.. automodule:: build_clustered_solar_rooftop_potentials
+
 Rule ``build_cop_profiles``
 ==============================================================================
 
 .. automodule:: build_cop_profiles
 
+Rule ``build_direct_heat_source_utilisation_profiles``
+==============================================================================
+
+.. automodule:: build_direct_heat_source_utilisation_profiles
+
+Rule ``build_central_heating_temperature_profiles``
+==============================================================================
+
+.. automodule:: build_central_heating_temperature_profiles
+
+Rule ``build_geothermal_heat_potential``
+==============================================================================
+
+.. automodule:: build_geothermal_heat_potential
+
+Rule ``build_tes_capacity_profiles``
+==============================================================================
+
+.. automodule:: build_tes_capacity_profiles
+
 Rule ``build_energy_totals``
 ==============================================================================
 
 .. automodule:: build_energy_totals
+
+Rule ``build_heat_totals``
+==============================================================================
+
+.. automodule:: build_heat_totals
 
 Rule ``build_gas_input_locations``
 ==============================================================================
@@ -121,6 +168,11 @@ Rule ``build_industry_sector_ratios``
 
 .. automodule:: build_industry_sector_ratios
 
+Rule ``build_industry_sector_ratios_intermediate``
+==============================================================================
+
+.. automodule:: build_industry_sector_ratios_intermediate
+
 Rule ``build_population_layouts``
 ==============================================================================
 
@@ -141,10 +193,15 @@ Rule ``build_salt_cavern_potentials``
 
 .. automodule:: build_salt_cavern_potentials
 
-Rule ``build_sequestration_potentials``
+Rule ``build_co2_sequestration_potentials``
 ==============================================================================
 
-.. automodule:: build_sequestration_potentials
+.. automodule:: build_co2_sequestration_potentials
+
+Rule ``build_clustered_co2_sequestration_potentials``
+==============================================================================
+
+.. automodule:: build_clustered_co2_sequestration_potentials
 
 Rule ``build_shipping_demand``
 ==============================================================================
@@ -171,10 +228,10 @@ Rule ``cluster_gas_network``
 
 .. automodule:: cluster_gas_network
 
-Rule ``copy_config``
+Rule ``time_aggregation``
 ==============================================================================
 
-.. automodule:: copy_config
+.. automodule:: time_aggregation
 
 Rule ``prepare_sector_network``
 ==============================================================================

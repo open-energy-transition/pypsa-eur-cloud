@@ -1,17 +1,73 @@
 <!--
-SPDX-FileCopyrightText: 2017-2023 The PyPSA-Eur Authors
+SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 SPDX-License-Identifier: CC-BY-4.0
 -->
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/pypsa/pypsa-eur?include_prereleases)
-[![Build Status](https://github.com/pypsa/pypsa-eur/actions/workflows/ci.yaml/badge.svg)](https://github.com/PyPSA/pypsa-eur/actions)
+[![Test workflows](https://github.com/pypsa/pypsa-eur/actions/workflows/test.yaml/badge.svg)](https://github.com/pypsa/pypsa-eur/actions/workflows/test.yaml)
 [![Documentation](https://readthedocs.org/projects/pypsa-eur/badge/?version=latest)](https://pypsa-eur.readthedocs.io/en/latest/?badge=latest)
 ![Size](https://img.shields.io/github/repo-size/pypsa/pypsa-eur)
 [![Zenodo PyPSA-Eur](https://zenodo.org/badge/DOI/10.5281/zenodo.3520874.svg)](https://doi.org/10.5281/zenodo.3520874)
 [![Zenodo PyPSA-Eur-Sec](https://zenodo.org/badge/DOI/10.5281/zenodo.3938042.svg)](https://doi.org/10.5281/zenodo.3938042)
-[![Snakemake](https://img.shields.io/badge/snakemake-≥7.7.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.14.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+[![Discord](https://img.shields.io/discord/911692131440148490?logo=discord)](https://discord.gg/AnuJBk23FU)
 [![REUSE status](https://api.reuse.software/badge/github.com/pypsa/pypsa-eur)](https://api.reuse.software/info/github.com/pypsa/pypsa-eur)
-[![Stack Exchange questions](https://img.shields.io/stackexchange/stackoverflow/t/pypsa)](https://stackoverflow.com/questions/tagged/pypsa)
+
+# {{project_name}}
+<img src="https://raw.githubusercontent.com/open-energy-transition/oet-website/main/assets/img/oet-logo-red-n-subtitle.png" alt="Open Energy Transition Logo" width="260" height="100" align="right">
+
+This repository is a soft-fork of [PyPSA-Eur](https://github.com/pypsa/pypsa-eur) and contains the entire project `{{project_name}}` supported by [Open Energy Transition (OET)](https://openenergytransition.org/)<sup>*</sup>, including code and report. The philosophy behind this repository is that no intermediary results are included, but all results are computed from raw data and code. The structure is also inspired by [cookiecutter-project](https://github.com/PyPSA/cookiecutter-project).
+
+This repository is maintained using [OET's soft-fork strategy](https://open-energy-transition.github.io/handbook/docs/Engineering/SoftForkStrategy). OET's primary aim is to contribute as much as possible to the open source (OS) upstream repositories. For long-term changes that cannot be directly merged upstream, the strategy organizes and maintains OET forks, ensuring they remain up-to-date and compatible with upstream, while also supporting future contributions back to the OS repositories.
+
+
+# Repository structure
+
+* `benchmarks`: will store `snakemake` benchmarks (does not exist initially)
+* `config`: configurations used in the study
+* `cutouts`: will store raw weather data cutouts from `atlite` (does not exist initially)
+* `data`: includes input data that is not produced by any `snakemake` rule
+* `doc`: includes all files necessary to build the `readthedocs` documentation of PyPSA-Eur
+* `envs`: includes all the `mamba` environment specifications to run the workflow
+* `logs`: will store log files (does not exist initially)
+* `notebooks`: includes all the `notebooks` used for ad-hoc analysis
+* `report`: contains all files necessary to build the report; plots and result files are generated automatically
+* `rules`: includes all the `snakemake`rules loaded in the `Snakefile`
+* `resources`: will store intermediate results of the workflow which can be picked up again by subsequent rules (does not exist initially)
+* `results`: will store the solved PyPSA network data, summary files and plots (does not exist initially)
+* `scripts`: includes all the Python scripts executed by the `snakemake` rules to build the model
+
+# Installation and Usage
+
+## 1. Installation
+
+Clone the repository:
+
+    git clone https://github.com/open-energy-transition/{{repository}}
+
+You need [mamba](https://mamba.readthedocs.io/en/latest/) to run the analysis. Users may also prefer to use [micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html) or [conda](https://docs.conda.io/projects/conda/en/latest/index.html). Using `mamba`, you can create an environment from within you can run it:
+
+    mamba env create -f environment.yaml
+
+Activate the newly created `{{project_short_name}}` environment:
+
+    mamba activate {{project_short_name}}
+
+## 2. Run the analysis
+
+    snakemake -call
+
+This will run all analysis steps to reproduce results and build the report.
+
+To generate a PDF of the dependency graph of all steps `resources/dag.pdf` run:
+
+    snakemake -c1 dag
+
+<sup>*</sup> Open Energy Transition (g)GmbH, Königsallee 52, 95448 Bayreuth, Germany
+
+----
+
+----
 
 # PyPSA-Eur: A Sector-Coupled Open Optimisation Model of the European Energy System
 
@@ -65,10 +121,10 @@ The dataset consists of:
   (alternating current lines at and above 220kV voltage level and all high
   voltage direct current lines) and 3803 substations.
 - The open power plant database
-  [powerplantmatching](https://github.com/FRESNA/powerplantmatching).
+  [powerplantmatching](https://github.com/PyPSA/powerplantmatching).
 - Electrical demand time series from the
   [OPSD project](https://open-power-system-data.org/).
-- Renewable time series based on ERA5 and SARAH, assembled using the [atlite tool](https://github.com/FRESNA/atlite).
+- Renewable time series based on ERA5 and SARAH, assembled using the [atlite tool](https://github.com/PyPSA/atlite).
 - Geographical potentials for wind and solar generators based on land use (CORINE) and excluding nature reserves (Natura2000) are computed with the [atlite library](https://github.com/PyPSA/atlite).
 
 A sector-coupled extension adds demand
@@ -80,7 +136,7 @@ all greenhouse gas emitters except waste management and land use.
 This diagram gives an overview of the sectors and the links between
 them:
 
-![sector diagram](graphics/multisector_figure.png)
+![sector diagram](doc/img/multisector_figure.png)
 
 Each of these sectors is built up on the transmission network nodes
 from [PyPSA-Eur](https://github.com/PyPSA/pypsa-eur):
@@ -95,9 +151,7 @@ repository](https://doi.org/10.5281/zenodo.3601881).
 
 # Contributing and Support
 We strongly welcome anyone interested in contributing to this project. If you have any ideas, suggestions or encounter problems, feel invited to file issues or make pull requests on GitHub.
--   In case of code-related **questions**, please post on [stack overflow](https://stackoverflow.com/questions/tagged/pypsa).
--   For non-programming related and more general questions please refer to the [mailing list](https://groups.google.com/group/pypsa).
--   To **discuss** with other PyPSA users, organise projects, share news, and get in touch with the community you can use the [discord server](https://discord.com/invite/AnuJBk23FU).
+-   To **discuss** with other PyPSA users, organise projects, share news, and get in touch with the community you can use the [Discord server](https://discord.gg/AnuJBk23FU).
 -   For **bugs and feature requests**, please use the [PyPSA-Eur Github Issues page](https://github.com/PyPSA/pypsa-eur/issues).
 
 # Licence
@@ -105,4 +159,4 @@ We strongly welcome anyone interested in contributing to this project. If you ha
 The code in PyPSA-Eur is released as free software under the
 [MIT License](https://opensource.org/licenses/MIT), see [`doc/licenses.rst`](doc/licenses.rst).
 However, different licenses and terms of use may apply to the various
-input data.
+input data, see [`doc/data_sources.rst`](doc/data_sources.rst).

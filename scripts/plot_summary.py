@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -11,83 +10,15 @@ import logging
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
-from prepare_sector_network import co2_emissions_year
+
+from scripts._helpers import configure_logging, rename_techs, set_scenario_config
+from scripts.prepare_sector_network import co2_emissions_year
 
 logger = logging.getLogger(__name__)
-plt.style.use("ggplot")
+plt.style.use("bmh")
 
 
 # consolidate and rename
-def rename_techs(label):
-    prefix_to_remove = [
-        "residential ",
-        "services ",
-        "urban ",
-        "rural ",
-        "central ",
-        "decentral ",
-    ]
-
-    rename_if_contains = [
-        "CHP",
-        "gas boiler",
-        "biogas",
-        "solar thermal",
-        "air heat pump",
-        "ground heat pump",
-        "resistive heater",
-        "Fischer-Tropsch",
-    ]
-
-    rename_if_contains_dict = {
-        "water tanks": "hot water storage",
-        "retrofitting": "building retrofitting",
-        # "H2 Electrolysis": "hydrogen storage",
-        # "H2 Fuel Cell": "hydrogen storage",
-        # "H2 pipeline": "hydrogen storage",
-        "battery": "battery storage",
-        "H2 for industry": "H2 for industry",
-        "land transport fuel cell": "land transport fuel cell",
-        "land transport oil": "land transport oil",
-        "oil shipping": "shipping oil",
-        # "CC": "CC"
-    }
-
-    rename = {
-        "solar": "solar PV",
-        "Sabatier": "methanation",
-        "offwind": "offshore wind",
-        "offwind-ac": "offshore wind (AC)",
-        "offwind-dc": "offshore wind (DC)",
-        "onwind": "onshore wind",
-        "ror": "hydroelectricity",
-        "hydro": "hydroelectricity",
-        "PHS": "hydroelectricity",
-        "NH3": "ammonia",
-        "co2 Store": "DAC",
-        "co2 stored": "CO2 sequestration",
-        "AC": "transmission lines",
-        "DC": "transmission lines",
-        "B2B": "transmission lines",
-    }
-
-    for ptr in prefix_to_remove:
-        if label[: len(ptr)] == ptr:
-            label = label[len(ptr) :]
-
-    for rif in rename_if_contains:
-        if rif in label:
-            label = rif
-
-    for old, new in rename_if_contains_dict.items():
-        if old in label:
-            label = new
-
-    for old, new in rename.items():
-        if old == label:
-            label = new
-    return label
-
 
 preferred_order = pd.Index(
     [
@@ -135,7 +66,7 @@ def plot_costs():
         snakemake.input.costs, index_col=list(range(3)), header=list(range(n_header))
     )
 
-    df = cost_df.groupby(cost_df.index.get_level_values(2)).sum()
+    df = cost_df.groupby("carrier").sum()
 
     # convert to billions
     df = df / 1e9
@@ -186,6 +117,7 @@ def plot_costs():
     )
 
     fig.savefig(snakemake.output.costs, bbox_inches="tight")
+    plt.close(fig)
 
 
 def plot_energy():
@@ -193,7 +125,7 @@ def plot_energy():
         snakemake.input.energy, index_col=list(range(2)), header=list(range(n_header))
     )
 
-    df = energy_df.groupby(energy_df.index.get_level_values(1)).sum()
+    df = energy_df.groupby("carrier").sum()
 
     # convert MWh to TWh
     df = df / 1e6
@@ -216,6 +148,7 @@ def plot_energy():
     if df.empty:
         fig, ax = plt.subplots(figsize=(12, 8))
         fig.savefig(snakemake.output.energy, bbox_inches="tight")
+        plt.close(fig)
         return
 
     new_index = preferred_order.intersection(df.index).append(
@@ -258,6 +191,7 @@ def plot_energy():
     )
 
     fig.savefig(snakemake.output.energy, bbox_inches="tight")
+    plt.close(fig)
 
 
 def plot_balances():
@@ -267,30 +201,14 @@ def plot_balances():
         snakemake.input.balances, index_col=list(range(3)), header=list(range(n_header))
     )
 
-    balances = {i.replace(" ", "_"): [i] for i in balances_df.index.levels[0]}
-    balances["energy"] = [
-        i for i in balances_df.index.levels[0] if i not in co2_carriers
-    ]
+    balances = {k: df for k, df in balances_df.groupby("bus_carrier")}
+    balances["energy"] = balances_df.groupby(["component", "carrier"]).sum()
 
-    for k, v in balances.items():
-        df = balances_df.loc[v]
-        df = df.groupby(df.index.get_level_values(2)).sum()
+    for bus_carrier, df in balances.items():
+        df = df.groupby("carrier").sum()
 
         # convert MWh to TWh
         df = df / 1e6
-
-        # remove trailing link ports
-        df.index = [
-            (
-                i[:-1]
-                if (
-                    (i not in ["co2", "NH3", "H2"])
-                    and (i[-1:] in ["0", "1", "2", "3", "4"])
-                )
-                else i
-            )
-            for i in df.index
-        ]
 
         df = df.groupby(df.index.map(rename_techs)).sum()
 
@@ -298,16 +216,16 @@ def plot_balances():
             df.abs().max(axis=1) < snakemake.params.plotting["energy_threshold"] / 10
         ]
 
-        units = "MtCO2/a" if v[0] in co2_carriers else "TWh/a"
+        units = "MtCO2/a" if bus_carrier in co2_carriers else "TWh/a"
         logger.debug(
-            f"Dropping technology energy balance smaller than {snakemake.params['plotting']['energy_threshold']/10} {units}"
+            f"Dropping technology energy balance smaller than {snakemake.params['plotting']['energy_threshold'] / 10} {units}"
         )
         logger.debug(df.loc[to_drop])
 
         df = df.drop(to_drop)
 
         logger.debug(
-            f"Total energy balance for {v} of {round(df.sum().iloc[0],2)} {units}"
+            f"Total energy balance for {bus_carrier} of {round(df.sum().iloc[0], 2)} {units}"
         )
 
         if df.empty:
@@ -333,7 +251,7 @@ def plot_balances():
         handles.reverse()
         labels.reverse()
 
-        if v[0] in co2_carriers:
+        if bus_carrier in co2_carriers:
             ax.set_ylabel("CO2 [MtCO2/a]")
         else:
             ax.set_ylabel("Energy [TWh/a]")
@@ -351,7 +269,10 @@ def plot_balances():
             frameon=False,
         )
 
-        fig.savefig(snakemake.output.balances[:-10] + k + ".pdf", bbox_inches="tight")
+        fig.savefig(
+            snakemake.output.balances[:-10] + bus_carrier + ".svg", bbox_inches="tight"
+        )
+        plt.close(fig)
 
 
 def historical_emissions(countries):
@@ -427,13 +348,13 @@ def historical_emissions(countries):
     )
 
     emissions = co2_totals.loc["electricity"]
-    if "T" in opts:
+    if options["transport"]:
         emissions += co2_totals.loc[[i + " non-elec" for i in ["rail", "road"]]].sum()
-    if "H" in opts:
+    if options["heating"]:
         emissions += co2_totals.loc[
             [i + " non-elec" for i in ["residential", "services"]]
         ].sum()
-    if "I" in opts:
+    if options["industry"]:
         emissions += co2_totals.loc[
             [
                 "industrial non-elec",
@@ -447,7 +368,7 @@ def historical_emissions(countries):
     return emissions
 
 
-def plot_carbon_budget_distribution(input_eurostat):
+def plot_carbon_budget_distribution(input_eurostat, options):
     """
     Plot historical carbon emissions in the EU and decarbonization path.
     """
@@ -461,7 +382,6 @@ def plot_carbon_budget_distribution(input_eurostat):
     plt.rcParams["ytick.labelsize"] = 20
 
     emissions_scope = snakemake.params.emissions_scope
-    report_year = snakemake.params.eurostat_report_year
     input_co2 = snakemake.input.co2
 
     # historic emissions
@@ -469,17 +389,17 @@ def plot_carbon_budget_distribution(input_eurostat):
     e_1990 = co2_emissions_year(
         countries,
         input_eurostat,
-        opts,
+        options,
         emissions_scope,
-        report_year,
         input_co2,
         year=1990,
     )
     emissions = historical_emissions(countries)
     # add other years https://sdi.eea.europa.eu/data/0569441f-2853-4664-a7cd-db969ef54de0
-    emissions.loc[2019] = 2.971372
-    emissions.loc[2020] = 2.691958
-    emissions.loc[2021] = 2.869355
+    emissions.loc[2019] = 3.414362
+    emissions.loc[2020] = 3.092434
+    emissions.loc[2021] = 3.290418
+    emissions.loc[2022] = 3.213025
 
     if snakemake.config["foresight"] == "myopic":
         path_cb = "results/" + snakemake.params.RDIR + "/csvs/"
@@ -562,19 +482,21 @@ def plot_carbon_budget_distribution(input_eurostat):
     )
 
     plt.grid(axis="y")
-    path = snakemake.output.balances.split("balances")[0] + "carbon_budget.pdf"
+    path = snakemake.output.balances.split("balances")[0] + "carbon_budget.svg"
     plt.savefig(path, bbox_inches="tight")
+    plt.close()
 
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("plot_summary")
 
-    logging.basicConfig(level=snakemake.config["logging"]["level"])
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
-    n_header = 4
+    n_header = 3
 
     plot_costs()
 
@@ -582,7 +504,9 @@ if __name__ == "__main__":
 
     plot_balances()
 
-    for sector_opts in snakemake.params.sector_opts:
-        opts = sector_opts.split("-")
-        if any("cb" in o for o in opts) or snakemake.config["foresight"] == "perfect":
-            plot_carbon_budget_distribution(snakemake.input.eurostat)
+    co2_budget = snakemake.params["co2_budget"]
+    if (
+        isinstance(co2_budget, str) and co2_budget.startswith("cb")
+    ) or snakemake.params["foresight"] == "perfect":
+        options = snakemake.params.sector
+        plot_carbon_budget_distribution(snakemake.input.eurostat, options)

@@ -1,5 +1,5 @@
 ..
-  SPDX-FileCopyrightText: 2019-2023 The PyPSA-Eur Authors
+  SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 
   SPDX-License-Identifier: CC-BY-4.0
 
@@ -34,4 +34,16 @@ including our own are reviewed by a second person before they are incorporated i
 
 If you are unfamiliar with pull requests, the GitHub help pages have a nice `guide <https://help.github.com/en/articles/about-pull-requests>`_.
 
-To ask and answer general usage questions, join the `PyPSA mailing list <https://groups.google.com/forum/#!forum/pypsa>`_.
+To **discuss** with other PyPSA users, organise projects, share news, and get in touch with the community you can use the `Discord server <https://discord.gg/AnuJBk23FU>`_.
+
+Contributing to the documentation
+====================================
+
+We strive to keep documentation useful and up to date for all PyPSA users. If you encounter an area where documentation is not available or insufficient, we very much welcome your contribution. Here is How To:
+
+#. Install the conda environment for documentation from the `PyPSA repository <https://github.com/PyPSA/PyPSA/blob/master/environment_docs.yml>`_.
+   (Here is `how to install a conda environment <https://pypsa-eur.readthedocs.io/en/latest/installation.html#install-python-dependencies>`_.)
+#. Make your changes in the corresponding .rst file under ``pypsa-eur/doc``.
+#. Compile your changes by running the following command in your terminal in the ``doc`` folder: ``make html``
+   You may encounter some warnings, but end up with a message such as ``build succeeded, XX warnings.``. html files to review your changes can then be found under ``doc/_build/html``.
+#. Contribute your documentation in a pull request (`here is a guide <https://help.github.com/en/articles/about-pull-requests>`_).

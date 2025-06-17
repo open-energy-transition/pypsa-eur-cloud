@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -8,28 +7,32 @@ ports.
 """
 
 import json
+import logging
 
 import geopandas as gpd
 import pandas as pd
 
+from scripts._helpers import configure_logging, set_scenario_config
+
+logger = logging.getLogger(__name__)
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake(
-            "build_shipping_demand_per_node",
-            simpl="",
-            clusters=48,
-        )
+        snakemake = mock_snakemake("build_shipping_demand", clusters=48)
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     scope = gpd.read_file(snakemake.input.scope).geometry[0]
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
-    demand = pd.read_csv(snakemake.input.demand, index_col=0)[
+    demand = pd.read_csv(snakemake.input.demand, index_col=[0, 1])[
         "total international navigation"
     ]
+    demand = demand.xs(snakemake.params.energy_totals_year, level=1)
 
     # read port data into GeoDataFrame
-    with open(snakemake.input.ports, "r", encoding="latin_1") as f:
+    with open(snakemake.input.ports, encoding="latin_1") as f:
         ports = json.load(f)
     ports = pd.json_normalize(ports, "features", sep="_")
     coordinates = ports.geometry_coordinates
@@ -42,9 +45,7 @@ if __name__ == "__main__":
     # assign ports to nearest region
     p = european_ports.to_crs(3857)
     r = regions.to_crs(3857)
-    outflows = (
-        p.sjoin_nearest(r).groupby("index_right").properties_outflows.sum().div(1e3)
-    )
+    outflows = p.sjoin_nearest(r).groupby("name").properties_outflows.sum().div(1e3)
 
     # calculate fraction of each country's port outflows
     countries = outflows.index.str[:2]

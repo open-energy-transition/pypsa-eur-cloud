@@ -1,21 +1,33 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
 Build industrial production per model region.
+
+Description
+-------
+
+This rule maps the industrial production per country from a certain time horizon to each bus region.
+The mapping file provides a value between 0 and 1 for each bus and industry subcategory, indicating the share of the country's production of that sector in that bus.
+The industrial production per country is multiplied by the mapping value to get the industrial production per bus.
+The unit of the production is kt/a.
 """
 
+import logging
 from itertools import product
 
 import pandas as pd
 
+from scripts._helpers import configure_logging, set_scenario_config
+
+logger = logging.getLogger(__name__)
+
 # map JRC/our sectors to hotmaps sector, where mapping exist
 sector_mapping = {
-    "Electric arc": "Iron and steel",
-    "Integrated steelworks": "Iron and steel",
-    "DRI + Electric arc": "Iron and steel",
-    "Ammonia": "Chemical industry",
+    "Electric arc": "EAF",
+    "Integrated steelworks": "Integrated steelworks",
+    "DRI + Electric arc": "DRI + EAF",
+    "Ammonia": "Ammonia",
     "HVC": "Chemical industry",
     "HVC (mechanical recycling)": "Chemical industry",
     "HVC (chemical recycling)": "Chemical industry",
@@ -55,6 +67,15 @@ def build_nodal_industrial_production():
         buses = keys.index[keys.country == country]
         mapping = sector_mapping.get(sector, "population")
 
+        try:
+            key = keys.loc[buses, mapping].fillna(0)
+        except KeyError:
+            logger.info(
+                f"No industrial production available for {mapping}. Filling with zeros."
+            )
+            keys[mapping] = 0
+            key = keys.loc[buses, mapping].fillna(0)
+
         key = keys.loc[buses, mapping]
         nodal_production.loc[buses, sector] = (
             industrial_production.at[country, sector] * key
@@ -65,12 +86,10 @@ def build_nodal_industrial_production():
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake(
-            "build_industrial_production_per_node",
-            simpl="",
-            clusters=48,
-        )
+        snakemake = mock_snakemake("build_industrial_production_per_node", clusters=48)
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     build_nodal_industrial_production()

@@ -1,6 +1,8 @@
-# SPDX-FileCopyrightText: : 2017-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: CC0-1.0
+
+master
 
 .snakemake*
 .ipynb_checkpoints
@@ -8,7 +10,9 @@ __pycache__
 *dconf
 gurobi.log
 .vscode
+.idea
 *.orig
+.idea
 
 /bak
 /resources
@@ -20,27 +24,31 @@ gurobi.log
 /notebooks
 /data
 /cutouts
-
+/tmp
 doc/_build
 
-config.yaml
+
+/scripts/old
+/scripts/create_scenarios.py
+/config/create_scenarios.py
+
+config/config.yaml
+config/scenarios.yaml
 
 dconf
 /data/links_p_nom.csv
 /data/*totals.csv
 /data/biomass*
-/data/bundle-sector/emobility/
-/data/bundle-sector/eea*
-/data/bundle-sector/jrc*
+/data/bundle/emobility/
+/data/bundle/eea*
+/data/bundle/jrc*
 /data/heating/
-/data/bundle-sector/eurostat*
+/data/bundle/eurostat*
 /data/odyssee/
 /data/transport_data.csv
-/data/bundle-sector/switzerland*
 /data/.nfs*
-/data/bundle-sector/Industrial_Database.csv
-/data/retro/tabula-calculator-calcsetbuilding.csv
-/data/bundle-sector/nuts*
+/data/retro/*
+/data/bundle/nuts*
 data/gas_network/scigrid-gas/
 data/costs_*.csv
 
@@ -48,23 +56,23 @@ dask-worker-space/
 publications.jrc.ec.europa.eu/
 d1gam3xoknrgr2.cloudfront.net/
 
+#latex files in report/
+report/*.aux
+report/*.bbl
+report/*.blg
+report/*.log
+report/*.out
+report/*.toc
+
 *.org
 
 *.nc
 
 *~
-/scripts/old
 
 *.pyc
-/cutouts
-/tmp
-/pypsa
 
 *.xlsx
-
-config.yaml
-
-doc/_build
 
 *.xls
 
@@ -72,6 +80,8 @@ doc/_build
 
 *.ipynb
 
-data/costs_*
-
 merger-todos.md
+
+*.html
+# private dev folder
+dev/*

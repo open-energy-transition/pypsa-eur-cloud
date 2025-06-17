@@ -1,28 +1,29 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2023-2024 PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
 Plot clustered electricity transmission network.
 """
 
-import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pypsa
 from matplotlib.lines import Line2D
-from plot_power_network import load_projection
 from pypsa.plot import add_legend_lines
+
+from scripts._helpers import set_scenario_config
+from scripts.plot_power_network import load_projection
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
             "plot_power_network_clustered",
             clusters=128,
             configfiles=["../../config/config.test.yaml"],
         )
+    set_scenario_config(snakemake)
 
     lw_factor = 2e3
 
@@ -76,3 +77,4 @@ if __name__ == "__main__":
     )
 
     plt.savefig(snakemake.output.map, bbox_inches="tight")
+    plt.close()

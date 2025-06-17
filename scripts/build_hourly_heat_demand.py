@@ -1,29 +1,44 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
-Build hourly heat demand time series from daily ones.
+Build hourly heat demand time series from daily heat demand.
+
+Water and space heating demand profiles are generated using intraday profiles from BDEW. Different profiles are used for the residential and services sectors as well as weekdays and weekend.
+
+The daily heat demand is multiplied by the intraday profile to obtain the hourly heat demand time series. The rule is executed in ``build_sector.smk``.
 """
 
+import logging
 from itertools import product
 
 import pandas as pd
 import xarray as xr
-from _helpers import generate_periodic_profiles
+
+from scripts._helpers import (
+    configure_logging,
+    generate_periodic_profiles,
+    get_snapshots,
+    set_scenario_config,
+)
+
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake(
-            "build_hourly_heat_demands",
+            "build_hourly_heat_demand",
             scope="total",
-            simpl="",
-            clusters=48,
+            clusters=5,
         )
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
-    snapshots = pd.date_range(freq="h", **snakemake.params.snapshots)
+    snapshots = get_snapshots(
+        snakemake.params.snapshots, snakemake.params.drop_leap_day
+    )
 
     daily_space_heat_demand = (
         xr.open_dataarray(snakemake.input.heat_demand)
@@ -58,6 +73,6 @@ if __name__ == "__main__":
 
     heat_demand.index.name = "snapshots"
 
-    ds = heat_demand.stack().to_xarray()
+    ds = heat_demand.stack(future_stack=True).to_xarray()
 
     ds.to_netcdf(snakemake.output.heat_demand)

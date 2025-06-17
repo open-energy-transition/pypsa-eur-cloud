@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# SPDX-FileCopyrightText: : 2020-2023 The PyPSA-Eur Authors
+# SPDX-FileCopyrightText: Contributors to PyPSA-Eur <https://github.com/pypsa/pypsa-eur>
 #
 # SPDX-License-Identifier: MIT
 """
@@ -12,6 +11,8 @@ import geopandas as gpd
 import pandas as pd
 from pypsa.geo import haversine_pts
 from shapely import wkt
+
+from scripts._helpers import configure_logging, set_scenario_config
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,9 @@ def build_clustered_gas_network(df, bus_regions, length_factor=1.25):
     for i in [0, 1]:
         gdf = gpd.GeoDataFrame(geometry=df[f"point{i}"], crs="EPSG:4326")
 
-        bus_mapping = gpd.sjoin(
-            gdf, bus_regions, how="left", predicate="within"
-        ).index_right
+        bus_mapping = gpd.sjoin(gdf, bus_regions, how="left", predicate="within")[
+            "name"
+        ]
         bus_mapping = bus_mapping.groupby(bus_mapping.index).first()
 
         df[f"bus{i}"] = bus_mapping
@@ -56,6 +57,9 @@ def build_clustered_gas_network(df, bus_regions, length_factor=1.25):
 
     # drop pipes within the same region
     df = df.loc[df.bus1 != df.bus0]
+
+    if df.empty:
+        return df
 
     # recalculate lengths as center to center * length factor
     df["length"] = df.apply(
@@ -102,11 +106,11 @@ def aggregate_parallel_pipes(df):
 
 if __name__ == "__main__":
     if "snakemake" not in globals():
-        from _helpers import mock_snakemake
+        from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake("cluster_gas_network", simpl="", clusters="37")
-
-    logging.basicConfig(level=snakemake.config["logging"]["level"])
+        snakemake = mock_snakemake("cluster_gas_network", clusters="37")
+    configure_logging(snakemake)
+    set_scenario_config(snakemake)
 
     fn = snakemake.input.cleaned_gas_network
     df = pd.read_csv(fn, index_col=0)
