@@ -24,7 +24,6 @@ rule build_population_layouts:
     script:
         "../scripts/build_population_layouts.py"
 
-years = [2025, 2030, 2035, 2040, 2045, 2050]      
 rule build_wallon_demands:
     params:
         study=config_provider("run", "name"),  
