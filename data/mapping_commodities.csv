@@ -51,7 +51,7 @@ TRAETH,Ethanol for transport,PJ,TRA,,total energy for transport,total energy for
 TRABDL,Biodiesel for transport,PJ,TRA,,Fuel Tech – Diesel,Fuel Tech – Diesel,nan,nan,pure biodiesiel
 OILKER,Kerosenes - Jet Fuels,PJ,SUP,,Kerosenes - Jet Fuels,Kerosenes - Jet Fuels,nan,nan,nan
 BIORME,Biodiesel rapeseed methyl ester (RME),PJ,SUP,,Biodiesel rapeseed methyl ester (RME),Biodiesel rapeseed methyl ester (RME),nan,nan,nan
-RW3F,hot water for 3F houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
+RW3F,hot water for 3F houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
 RSDGSL,Gasoline for Residential sector,PJ,RSD,,Gasoline for Residential sector,Gasoline for Residential sector,nan,nan,nan
 BIOCRP1,Starch crops,PJ,SUP,,Starch crops,Starch crops,nan,nan,nan
 RENHYD,Hydro,PJ,SUP,,Hydro,Hydro,nan,nan,nan
@@ -88,7 +88,7 @@ AGRHET,Heat for agriculture,PJ,AGR,,Heat for agriculture,Heat for agriculture,na
 COAHAR,Hard Coal,PJ,SUP,,Hard Coal,Hard Coal,nan,nan,nan
 OILOTH,Other Petroleum Products,PJ,SUP,,Other fuels,Other Petroleum Products,nan,nan,nan
 SUPGAS,Supply: Natural Gas,PJ,SUP,,Supply: Natural Gas,Supply: Natural Gas,nan,nan,nan
-RH3F,space heating for 3F houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
+RH3F,space heating for 3F houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
 BIOETH,Bioethanol,PJ,SUP,,Other fuels,Bioethanol,nan,nan,nan
 SYNH2CT,Centralized hydrogen (Tank storage),PJ,SUP,,Centralized hydrogen (Tank storage),Centralized hydrogen (Tank storage),nan,nan,nan
 RW2F,hot water for 2F houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
@@ -103,14 +103,14 @@ SUPBGS,Biogas for Supply sector,PJ,SUP,,Biogas,Biogas for Supply sector,nan,nan,
 RHDJAP_2021,space heating for apartments (2021),PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RHDJ4F_2021,space heating for 4f houses (2021),PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
 RHN4F,space heating for 4f houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
-RWN3F,hot water for 3F houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
+RWN3F,hot water for 3F houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
 RHNAP,space heating for apartments,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RHDJ2F_2021,space heating for 2f houses (2021),PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RHN2F,space heating for 2f houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RWNAP,hot water for apartments (new),PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RWN4F,hot water for 4F houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
-RHDJ3F_2021,space heating for 3F houses (2021),PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
-RHN3F,space heating for 3f houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
+RHDJ3F_2021,space heating for 3F houses (2021),PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
+RHN3F,space heating for 3f houses,PJ,RSD,,BEWAL residential rural heat,Heat,nan,nan,nan
 RWN2F,hot water for 2F houses,PJ,RSD,,BEWAL residential urban decentral heat,Heat,nan,nan,nan
 RCDR,Rsd.Cloth Drying.Existing,PJ,RSD,,electricity for residential,Electricity ,nan,nan,nan
 RCOK,Rsd.Cooking.Existing,PJ,RSD,,electricity for residential,Electricity ,nan,nan,nan
