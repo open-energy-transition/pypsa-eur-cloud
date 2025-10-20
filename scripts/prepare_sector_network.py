@@ -2565,7 +2565,6 @@ def add_ice_cars(
         options["ICE_lower_degree_factor"],
         options["ICE_upper_degree_factor"],
     )
-    
     # Calculate oil demand profile
     #all other nodes respect the config file shares while wallon region shares are automatically
     #computed from times assuming same efficiencies to keep the original demands
@@ -2997,8 +2996,7 @@ def add_heat(
                 .multiply(
                     factor * (1 + options["district_heating"]["district_heating_loss"])
                 )
-            )
-            
+            )  
         n.add(
             "Load",
             nodes,
@@ -3007,7 +3005,6 @@ def add_heat(
             carrier=f"{heat_system} heat",
             p_set=heat_load.loc[n.snapshots],
         )
-        
         if options["tes"]:
             n.add("Carrier", f"{heat_system} water tanks")
 

@@ -3,6 +3,12 @@ import pandas as pd
 import plotly.graph_objects as go
 from collections import defaultdict
 from pathlib import Path
+from scripts._helpers import (
+    configure_logging,
+)
+
+import logging
+logger = logging.getLogger(__name__)
 
 def parse_times_line(line):
     """
@@ -34,7 +40,7 @@ def load_raw_records(vd_file_path, start_year=2021):
     [year, region, timeslice, variable, commodity_code, process_code, value]
     """
     flows = []
-    print(f"Processing {vd_file_path} (all variables, all commodities)...")
+    logger.info(f"Processing {vd_file_path} (all variables, all commodities)...")
 
     # --- Debugging counters ---
     line_count = 0
@@ -79,10 +85,10 @@ def load_raw_records(vd_file_path, start_year=2021):
             except (ValueError, IndexError):
                 continue
 
-    print("\n--- Processing Debug Info ---")
-    print(f"Total lines scanned: {line_count}")
-    print(f"Total records kept (year >= {start_year} and non-zero): {kept_record_count}")
-    print("---------------------------\n")
+    logger.info("\n--- Processing Debug Info ---")
+    logger.info(f"Total lines scanned: {line_count}")
+    logger.info(f"Total records kept (year >= {start_year} and non-zero): {kept_record_count}")
+    logger.info("---------------------------\n")
 
     return pd.DataFrame(flows)
 
@@ -126,7 +132,7 @@ def filter_for_sankey(annual_df, year, mapping_df=None, processes_df=None):
     if energy_codes and 'commodity_code' in df.columns:
         original_rows = len(df)
         df = df[df['commodity_code'].astype(str).isin(energy_codes)]
-        print(f"Kept {len(df)} of {original_rows} rows after commodity unit filtering (PJ only).")
+        logger.info(f"Kept {len(df)} of {original_rows} rows after commodity unit filtering (PJ only).")
 
     # 2. Filter by Process Unit = 'PJ'
     pj_process_codes = set()
@@ -136,7 +142,7 @@ def filter_for_sankey(annual_df, year, mapping_df=None, processes_df=None):
     if pj_process_codes and 'process_code' in df.columns:
         original_rows = len(df)
         df = df[df['process_code'].astype(str).isin(pj_process_codes)]
-        print(f"Kept {len(df)} of {original_rows} rows after process unit filtering (PJ only).")
+        logger.info(f"Kept {len(df)} of {original_rows} rows after process unit filtering (PJ only).")
 
     return df, energy_codes
 
@@ -144,11 +150,11 @@ def filter_for_sankey(annual_df, year, mapping_df=None, processes_df=None):
 def analyze_process_connectivity(df):
     """
     Inspect which processes have both inflows (VAR_FIn) and outflows (VAR_FOut).
-    Print warnings for isolated processes that have only inflows or only outflows.
+    Logger warnings for isolated processes that have only inflows or only outflows.
     Returns a tuple of (both_io, only_in, only_out) as sets of process codes.
     """
     if df.empty:
-        print("Filtered data is empty; cannot analyze connectivity.")
+        logger.info("Filtered data is empty; cannot analyze connectivity.")
         return set(), set(), set()
 
     var_by_process = df.groupby('process_code')['variable'].apply(lambda s: set(v.upper() for v in s)).to_dict()
@@ -166,13 +172,13 @@ def analyze_process_connectivity(df):
         elif has_out and not has_in:
             only_out.add(proc)
 
-    print("\n--- Process Connectivity ---")
-    print(f"Processes with both inflows and outflows: {len(both_io)}")
+    logger.info("\n--- Process Connectivity ---")
+    logger.info(f"Processes with both inflows and outflows: {len(both_io)}")
     if only_in:
-        print(f"Warning: Processes with inflows only (potentially isolated): {len(only_in)}")
+        logger.info(f"Warning: Processes with inflows only (potentially isolated): {len(only_in)}")
     if only_out:
-        print(f"Warning: Processes with outflows only (potentially isolated): {len(only_out)}")
-    print("--------------------------------\n")
+        logger.info(f"Warning: Processes with outflows only (potentially isolated): {len(only_out)}")
+    logger.info("--------------------------------\n")
 
     return both_io, only_in, only_out
 
@@ -358,7 +364,7 @@ def apply_mapping_based_process_clustering(df, processes_df, agg_column_name, pr
     # Resolve the aggregation column name case-insensitively
     agg_col = _find_case_insensitive_column(processes_df, agg_column_name)
     if agg_col is None:
-        print(f"[INFO] Aggregation column '{agg_column_name}' not found in process mapping; skipping process clustering.")
+        logger.info(f"[INFO] Aggregation column '{agg_column_name}' not found in process mapping; skipping process clustering.")
         return df, {}
 
     # Ensure required columns exist
@@ -504,7 +510,7 @@ def build_commodity_groups_from_mapping(mapping_df, energy_commodity_codes):
     # Warn about energy commodities that are not in the mapping file
     missing = [c for c in energy_commodity_codes if c not in times_to_pypsa]
     if missing:
-        print(f"[WARN] {len(missing)} energy commodities are present in the data but not in the mapping file. They will appear ungrouped.")
+        logger.info(f"[WARN] {len(missing)} energy commodities are present in the data but not in the mapping file. They will appear ungrouped.")
         for code in missing:
              # Treat them as their own group
             times_to_pypsa[code] = code
@@ -571,9 +577,9 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
     --------
     None (saves CSV files)
     """
-    print("\n--- Extracting PyPSA Demands ---")
+    logger.info("\n--- Extracting PyPSA Demands ---")
     if apply_netting:
-        print("Netting will be applied to remove internal transfers within aggregated processes.")
+        logger.info("Netting will be applied to remove internal transfers within aggregated processes.")
     
     # Build process to aggregation mapping
     process_agg_map = {}
@@ -605,7 +611,7 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
                 if pypsa and pypsa.lower() not in ['nan', '']:
                     commodity_pypsa_map[comm] = pypsa
         else:
-            print("[WARNING] PyPSA Energy Carrier column not found in mapping file. Using Cluster column as fallback.")
+            logger.info("[WARNING] PyPSA Energy Carrier column not found in mapping file. Using Cluster column as fallback.")
             # Fallback to the passed mapping_df (which uses Cluster)
             if 'times' in commodities_mapping_df.columns and 'pypsa' in commodities_mapping_df.columns:
                 for _, row in commodities_mapping_df.iterrows():
@@ -697,11 +703,11 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
     available_years = sorted(annual_values_df['year'].unique())
     years = [y for y in available_years if start_year <= y <= end_year]
     
-    print(f"Available years in data: {years}")
+    logger.info(f"Available years in data: {years}")
     #Extracting heating capacities
     capacity_value = raw_flows_df.copy()
     for year in years:
-        print(f"Processing year {year}...")
+        logger.info(f"Processing year {year}...")
         filtered_capacities = capacity_value.loc[
             (capacity_value['year'] == year) &
             (capacity_value['variable'].isin(['VAR_Cap', 'VAR_Ncap']))
@@ -720,7 +726,7 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
         if matching_files:
            output_file = matching_files[0]
            aggregated_capacities.to_csv(output_file, index=True)
-           print(f"  Saved {output_file}")
+           logger.info(f"  Saved {output_file}")
         
         # Filter data for this year and VAR_FIN/VAR_FOUT only
         year_df = annual_values_df[
@@ -729,7 +735,7 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
         ].copy()
         
         if year_df.empty:
-            print(f"  Warning: No data for year {year}")
+            logger.info(f"  Warning: No data for year {year}")
             continue
         
         # Add aggregation level and pypsa carrier columns
@@ -802,14 +808,14 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
         # Save to CSV
         results_df = pd.DataFrame(results)
         results_df["year"] = year
-        output_files = list(snakemake.output.pypsa_demands)
+        output_files = list(snakemake.output.wallon_demands)
         matching_files = [f for f in output_files if str(year) in Path(f).stem]
         if matching_files:
            output_file = matching_files[0]
            results_df.to_csv(output_file, index=False)
-           print(f"  Saved {output_file}")
+           logger.info(f"  Saved {output_file}")
     
-    print("PyPSA demand extraction complete.\n")
+    logger.info("PyPSA demand extraction complete.\n")
 
 
 def build_sankey(df, output_html_file, year, flow_threshold=0.0, selected_year='', process_unit_map=None):
@@ -820,7 +826,7 @@ def build_sankey(df, output_html_file, year, flow_threshold=0.0, selected_year='
     - VAR_FOut: process -> commodity
     """
     if df.empty:
-        print("No data to plot after filtering.")
+        logger.info("No data to plot after filtering.")
         return None
 
     df = df.copy()
@@ -837,7 +843,7 @@ def build_sankey(df, output_html_file, year, flow_threshold=0.0, selected_year='
         links_df = links_df[links_df['value'] > flow_threshold]
 
     if links_df.empty:
-        print("No links above the threshold to plot.")
+        logger.info("No links above the threshold to plot.")
         return None
 
     nodes = pd.concat([links_df['source'], links_df['target']]).unique().tolist()
@@ -915,7 +921,7 @@ def build_sankey(df, output_html_file, year, flow_threshold=0.0, selected_year='
         font_size=10
     )
     fig.write_html(output_html_file)
-    print(f"Saved Sankey diagram to {output_html_file}")
+    logger.info(f"Saved Sankey diagram to {output_html_file}")
     return fig
 
 def main():
@@ -955,7 +961,7 @@ def main():
     output_html_file = f"resources/{study}/bau_sankey_{selected_year}_pj{'_clustered' if cluster else ''}.html"
 
     # --- Load metadata ---
-    print("Loading metadata...")
+    logger.info("Loading metadata...")
     # Load process mapping and construct processes_df from mapping
     process_mapping_file = snakemake.input.process_mapping_file
     processes_df = pd.read_csv(process_mapping_file)
@@ -1002,7 +1008,7 @@ def main():
     # --- Load raw records (no filtering by variable or commodity) ---
     raw_flows_df = load_raw_records(vd_file)
     if raw_flows_df.empty:
-        print("No valid energy flow data was processed. Exiting.")
+        logger.info("No valid energy flow data was processed. Exiting.")
         return
     
     # --- Aggregate to annual ---
@@ -1027,9 +1033,9 @@ def main():
     annual_values_df = annual_values_df[ordered_cols]
 
     # --- Save CSV ---
-    print(f"Writing annual aggregated values to {output_csv_file} ...")
+    logger.info(f"Writing annual aggregated values to {output_csv_file} ...")
     annual_values_df.to_csv(output_csv_file, index=False)
-    print("Done.")
+    logger.info("Done.")
 
     # --- Extract PyPSA demands ---
     extract_pypsa_demands(
@@ -1044,7 +1050,7 @@ def main():
     )
 
     # --- Filter for Sankey (year=2021, VAR_F*, energy commodities) ---
-    print("\n--- Filtering for Sankey Diagram ---")
+    logger.info("\n--- Filtering for Sankey Diagram ---")
     filtered_df, energy_codes = filter_for_sankey(
         annual_values_df,
         year=selected_year,
@@ -1052,7 +1058,7 @@ def main():
         processes_df=processes_df
     )
     if filtered_df.empty:
-        print("Filtered dataset for Sankey is empty; skipping Sankey generation.")
+        logger.info("Filtered dataset for Sankey is empty; skipping Sankey generation.")
         return
 
     # Before writing the filtered flows, attach columns showing the target clustered flow
@@ -1085,9 +1091,9 @@ def main():
         filtered_df['grouped_commodity_code'] = filtered_df['commodity_code']
         filtered_df['grouped_commodity'] = filtered_df['commodity']
 
-    print(f"Writing filtered flows to {output_filtered_csv} ...")
+    logger.info(f"Writing filtered flows to {output_filtered_csv} ...")
     filtered_df.to_csv(output_filtered_csv, index=False)
-    print("Done.")
+    logger.info("Done.")
 
     # --- Optional: Group commodities to reduce node count ---
     if group_commodities:
@@ -1106,7 +1112,7 @@ def main():
                 {"group_id": gid, "name": info['name'], "type": info['type'], "members": ';'.join(info['members'])}
                 for gid, info in groups_info.items()
             ]).to_csv(groups_csv_file, index=False)
-            print(f"Saved commodity groups to {groups_json_file} and {groups_csv_file}")
+            logger.info(f"Saved commodity groups to {groups_json_file} and {groups_csv_file}")
             # Apply grouping to the dataset used for Sankey
             filtered_df = apply_commodity_grouping(filtered_df, commodity_to_group, groups_info, commodities_df)
 
@@ -1118,11 +1124,11 @@ def main():
     final_unit_map = process_unit_map
 
     if not enable_process_clustering:
-        print("Process clustering disabled. Using unclustered data for Sankey.")
+        logger.info("Process clustering disabled. Using unclustered data for Sankey.")
         sankey_df = filtered_df
     else:
         # --- Apply mapping-based process clustering (no other clustering) ---
-        print(f"Applying process clustering using column: '{process_cluster_column}'")
+        logger.info(f"Applying process clustering using column: '{process_cluster_column}'")
         clustered_df, aggregated_unit_map = apply_mapping_based_process_clustering(
             filtered_df, processes_df, agg_column_name=process_cluster_column, process_unit_col=process_unit_col
         )
@@ -1132,7 +1138,7 @@ def main():
 
     # --- Netting option ---
     if netting:
-        print("Applying netting to bidirectional links...")
+        logger.info("Applying netting to bidirectional links...")
         sankey_df = net_bidirectional_links(sankey_df)
 
     # --- Build Sankey ---
@@ -1144,5 +1150,6 @@ if __name__ == "__main__":
         from scripts._helpers import mock_snakemake
 
         snakemake = mock_snakemake("build_wallon_demands")
+    configure_logging(snakemake)
     study = snakemake.params.study
     main()
