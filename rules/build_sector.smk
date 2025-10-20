@@ -33,6 +33,7 @@ rule build_wallon_demands:
         vd_file="data/bau_080925_0809.vd",
         process_mapping_file="data/mapping_processes.csv",
         mapping_file="data/mapping_commodities.csv",
+        extraction_rules_file = "data/extraction_rules.csv",
     output:
         heating_capacities =expand(resources("heating_capacities_{year}.csv"), year=years), 
         wallon_demands=expand(resources("wallon_demands_{year}.csv"), year=years), 
