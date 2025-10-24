@@ -30,10 +30,10 @@ rule build_wallon_demands:
         study=config_provider("run", "name"),  
     input:
         pop_layout_rural=resources("pop_layout_rural.nc"),
-        vd_file="data/bau_080925_0809.vd",
-        process_mapping_file="data/mapping_processes.csv",
-        mapping_file="data/mapping_commodities.csv",
-        extraction_rules_file = "data/extraction_rules.csv",
+        vd_file="data/walloon/bau_080925_0809.vd",
+        process_mapping_file="data/walloon/mapping_processes.csv",
+        mapping_file="data/walloon/mapping_commodities.csv",
+        extraction_rules_file = "data/walloon/extraction_rules.csv",
     output:
         heating_capacities =expand(resources("heating_capacities_{year}.csv"), year=years), 
         wallon_demands=expand(resources("wallon_demands_{year}.csv"), year=years), 

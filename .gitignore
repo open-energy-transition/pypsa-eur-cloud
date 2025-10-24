@@ -67,7 +67,6 @@ data/osm-prebuilt
 data/transmission_projects
 data/entsoegridkit
 data/existing_infrastructure
-data/walloon
 data/load_synthetic_raw.csv
 data/electricity_demand_raw.csv
 data/Industrial_Database.csv
