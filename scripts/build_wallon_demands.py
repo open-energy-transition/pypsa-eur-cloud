@@ -673,13 +673,10 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
         aggregated_capacities = (aggregated_capacities * 1000).round(2)
         #Droping all other technologies
         aggregated_capacities = aggregated_capacities[aggregated_capacities.index.str.contains('boiler|heat pump|stove|thermal|heater', case=False, na=False)]
-        aggregated_capacities["year"] = year
-        output_files = list(snakemake.output.heating_capacities)
-        matching_files = [f for f in output_files if str(year) in Path(f).stem]
-        if matching_files:
-           output_file = matching_files[0]
-           aggregated_capacities.to_csv(output_file, index=True)
-           logger.info(f"  Saved {output_file}")
+        aggregated_capacities["year"] = planning_horizon
+        output_file = snakemake.output.heating_capacities
+        aggregated_capacities.to_csv(output_file, index=True)
+        logger.info(f"  Saved {output_file}")
         
         # Filter data for this year and VAR_FIN/VAR_FOUT only
         year_df = annual_values_df[
@@ -760,13 +757,10 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
         
         # Save to CSV
         results_df = pd.DataFrame(results)
-        results_df["year"] = year
-        output_files = list(snakemake.output.wallon_demands)
-        matching_files = [f for f in output_files if str(year) in Path(f).stem]
-        if matching_files:
-           output_file = matching_files[0]
-           results_df.to_csv(output_file, index=False)
-           logger.info(f"  Saved {output_file}")
+        results_df["year"] = planning_horizon
+        output_file = snakemake.output.wallon_demands
+        results_df.to_csv(output_file, index=False)
+        logger.info(f"  Saved {output_file}")
     
     logger.info("PyPSA demand extraction complete.\n")
 
@@ -906,7 +900,7 @@ def main():
 
     # --- Configuration ---
     vd_file = snakemake.input.vd_file
-    selected_year = 2030
+    selected_year = planning_horizon
     # commodities_file removed in favor of mapping-based metadata
     # processes_file removed in favor of mapping-based metadata
     output_csv_file = f"resources/{study}/annual_values{'_clustered' if cluster else ''}.csv"
@@ -1102,7 +1096,9 @@ if __name__ == "__main__":
     if "snakemake" not in globals():
         from scripts._helpers import mock_snakemake
 
-        snakemake = mock_snakemake("build_wallon_demands")
+        snakemake = mock_snakemake("build_wallon_demands",
+                                  planning_horizons="2030",)
+    planning_horizon = int(snakemake.wildcards.planning_horizons[-4:])
     configure_logging(snakemake)
     study = snakemake.params.study
     main()

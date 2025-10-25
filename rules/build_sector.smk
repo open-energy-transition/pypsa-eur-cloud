@@ -24,7 +24,6 @@ rule build_population_layouts:
     script:
         "../scripts/build_population_layouts.py"
 
-years = [2025, 2030, 2035, 2040, 2045, 2050]
 rule build_wallon_demands:
     params:
         study=config_provider("run", "name"),  
@@ -35,14 +34,14 @@ rule build_wallon_demands:
         mapping_file="data/walloon/mapping_commodities.csv",
         extraction_rules_file = "data/walloon/extraction_rules.csv",
     output:
-        heating_capacities =expand(resources("heating_capacities_{year}.csv"), year=years), 
-        wallon_demands=expand(resources("wallon_demands_{year}.csv"), year=years), 
+        heating_capacities =resources("heating_capacities_{planning_horizons}.csv"), 
+        wallon_demands=resources("wallon_demands_{planning_horizons}.csv"), 
     log:
-        logs("build_wallon_demands.log"),
+        logs("build_wallon_demands_{planning_horizons}.log"),
     resources:
         mem_mb=20000,
     benchmark:
-        benchmarks("build_wallon_demands")
+        benchmarks("build_wallon_demands_{planning_horizons}")
     threads: 8
     conda:
         "../envs/environment.yaml"
@@ -52,7 +51,6 @@ rule build_wallon_demands:
 
 rule build_clustered_population_layouts:
     input:
-        wallon_demands=expand(resources("wallon_demands_{year}.csv"), year=years),
         pop_layout_total=resources("pop_layout_total.nc"),
         pop_layout_urban=resources("pop_layout_urban.nc"),
         pop_layout_rural=resources("pop_layout_rural.nc"),

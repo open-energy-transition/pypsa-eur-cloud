@@ -145,6 +145,16 @@ rule all:
             run=config["run"]["name"],
             **config["scenario"],
         ),
+        expand(
+            resources("heating_capacities_{planning_horizons}.csv"),
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
+        expand(
+            resources("wallon_demands_{planning_horizons}.csv"),
+            run=config["run"]["name"],
+            **config["scenario"],
+        ),
     default_target: True
 
 
