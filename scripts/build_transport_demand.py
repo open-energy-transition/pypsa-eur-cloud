@@ -71,21 +71,34 @@ def build_transport_demand(traffic_fn, airtemp_fn, nodes, nodal_transport_data):
     )
     # divide out the heating/cooling demand from ICE totals
     ice_correction = (transport_shape * (1 + dd_ICE)).sum() / transport_shape.sum()
-    # unit TWh
-    energy_totals_transport = (
+    if study == "walloon-model":
+        wallon_node = config["run"]["wallon_node"]
+        # unit TWh
+        energy_totals_transport = (
         pop_weighted_energy_totals["total road"]
-        + pop_weighted_energy_totals["total rail"].where(pop_weighted_energy_totals.index != "BEWAL", 0)
-        - pop_weighted_energy_totals["electricity rail"].where(pop_weighted_energy_totals.index != "BEWAL", 0)
-    )
-    # average fuel efficiency in MWh/100 km
-    eff = nodal_transport_data["average fuel efficiency"]
-    
-    transport = (transport_shape.multiply(energy_totals_transport) * 1e6 * nyears)
-    other_nodes = transport.columns.drop("BEWAL", errors='ignore')
-    eff = eff[other_nodes]
-    transport[other_nodes] = transport[other_nodes].divide(
+        + pop_weighted_energy_totals["total rail"].where(pop_weighted_energy_totals.index != wallon_node, 0)
+        - pop_weighted_energy_totals["electricity rail"].where(pop_weighted_energy_totals.index != wallon_node, 0)
+        )
+        # average fuel efficiency in MWh/100 km
+        eff = nodal_transport_data["average fuel efficiency"]
+        transport = (transport_shape.multiply(energy_totals_transport) * 1e6 * nyears)
+        other_nodes = transport.columns.drop(wallon_node, errors='ignore')
+        eff = eff[other_nodes]
+        transport[other_nodes] = transport[other_nodes].divide(
         eff * ice_correction[other_nodes]
-    )
+        )
+    else:
+        energy_totals_transport = (
+        pop_weighted_energy_totals["total road"]
+        + pop_weighted_energy_totals["total rail"]
+        - pop_weighted_energy_totals["electricity rail"]
+        )
+        # average fuel efficiency in MWh/100 km
+        eff = nodal_transport_data["average fuel efficiency"]
+        transport = (transport_shape.multiply(energy_totals_transport) * 1e6 * nyears)
+        transport = transport.divide(
+        eff * ice_correction
+        )
     return transport
 
 
@@ -170,7 +183,8 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_transport_demand", clusters=128, planning_horizons="2030",)
     configure_logging(snakemake)
     set_scenario_config(snakemake)
-
+    config = snakemake.config
+    study = config["run"]["name"]
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
 
     nodes = pop_layout.index

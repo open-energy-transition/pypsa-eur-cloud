@@ -6,6 +6,8 @@
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#run
 run:
   name: "walloon-model"
+  wallon_node: BEWAL
+  flemish_node: BEVLG
   scenarios:
     file: config/scenarios.yaml
 

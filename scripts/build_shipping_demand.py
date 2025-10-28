@@ -23,14 +23,12 @@ if __name__ == "__main__":
         snakemake = mock_snakemake("build_shipping_demand", clusters=48, planning_horizons="2030",)
     configure_logging(snakemake)
     set_scenario_config(snakemake)
-
     scope = gpd.read_file(snakemake.input.scope).geometry[0]
     regions = gpd.read_file(snakemake.input.regions).set_index("name")
     demand = pd.read_csv(snakemake.input.demand, index_col=[0, 1])[
         "total international navigation"
     ]
     demand = demand.xs(snakemake.params.energy_totals_year, level=1)
-    wallon_demands = pd.read_csv(snakemake.input.wallon_demands, index_col=0)[["TWh"]]
     # read port data into GeoDataFrame
     with open(snakemake.input.ports, encoding="latin_1") as f:
         ports = json.load(f)
@@ -57,6 +55,5 @@ if __name__ == "__main__":
     nodal_demand.index = fraction.index
     nodal_demand = nodal_demand.multiply(fraction, axis=0)
     nodal_demand = nodal_demand.reindex(regions.index, fill_value=0)
-    nodal_demand.loc["BEWAL"] = wallon_demands.loc["total domestic navigation"].squeeze()
     # export nodal international navigation demands
     nodal_demand.to_csv(snakemake.output[0])
