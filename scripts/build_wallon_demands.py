@@ -579,7 +579,7 @@ def load_extraction_rules():
 
     return rules
 
-def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, commodities_mapping_df, start_year=2021, end_year=2050, apply_netting=True):
+def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, commodities_mapping_df, apply_netting=True):
     """
     Extract aggregated PyPSA demands from TIMES data based on Aggregation Level 1 mapping
     and PyPSA Energy Carrier mapping.
@@ -654,48 +654,48 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
     extraction_rules = load_extraction_rules()
     # Process each year - use all available years in the data
     available_years = sorted(annual_values_df['year'].unique())
-    years = [y for y in available_years if start_year <= y <= end_year]
+    year = planning_horizon
     
-    logger.info(f"Available years in data: {years}")
+    logger.info(f"Available years in data: {year}")
     #Extracting heating capacities
     capacity_value = raw_flows_df.copy()
-    for year in years:
-        logger.info(f"Processing year {year}...")
-        filtered_capacities = capacity_value.loc[
+    # for year in years:
+    #     logger.info(f"Processing year {year}...")
+    filtered_capacities = capacity_value.loc[
             (capacity_value['year'] == year) &
             (capacity_value['variable'].isin(['VAR_Cap', 'VAR_Ncap']))
         ]
-        filtered_capacities = filtered_capacities.copy()
-        map_dict = mapping.set_index("Technology (Process)")["Aggregation Level 2"].to_dict()
-        filtered_capacities["mapped_process"] = filtered_capacities["process_code"].map(map_dict)
-        aggregated_capacities = filtered_capacities.groupby("mapped_process", dropna=False).sum(numeric_only=True).drop(columns=['year'])
-        #convert into MW
-        aggregated_capacities = (aggregated_capacities * 1000).round(2)
-        #Droping all other technologies
-        aggregated_capacities = aggregated_capacities[aggregated_capacities.index.str.contains('boiler|heat pump|stove|thermal|heater', case=False, na=False)]
-        aggregated_capacities["year"] = planning_horizon
-        output_file = snakemake.output.heating_capacities
-        aggregated_capacities.to_csv(output_file, index=True)
-        logger.info(f"  Saved {output_file}")
+    filtered_capacities = filtered_capacities.copy()
+    map_dict = mapping.set_index("Technology (Process)")["Aggregation Level 2"].to_dict()
+    filtered_capacities["mapped_process"] = filtered_capacities["process_code"].map(map_dict)
+    aggregated_capacities = filtered_capacities.groupby("mapped_process", dropna=False).sum(numeric_only=True).drop(columns=['year'])
+    #convert into MW
+    aggregated_capacities = (aggregated_capacities * 1000).round(2)
+    #Droping all other technologies
+    aggregated_capacities = aggregated_capacities[aggregated_capacities.index.str.contains('boiler|heat pump|stove|thermal|heater', case=False, na=False)]
+    aggregated_capacities["year"] = planning_horizon
+    output_file = snakemake.output.heating_capacities
+    aggregated_capacities.to_csv(output_file, index=True)
+    logger.info(f"  Saved {output_file}")
         
-        # Filter data for this year and VAR_FIN/VAR_FOUT only
-        year_df = annual_values_df[
+    # Filter data for this year and VAR_FIN/VAR_FOUT only
+    year_df = annual_values_df[
             (annual_values_df['year'] == year) & 
             (annual_values_df['variable'].str.upper().isin(['VAR_FIN', 'VAR_FOUT']))
         ].copy()
         
-        if year_df.empty:
+    if year_df.empty:
             logger.info(f"  Warning: No data for year {year}")
-            continue
+            # continue
         
         # Add aggregation level and pypsa carrier columns
-        year_df['agg_level_1'] = year_df['process_code'].map(process_agg_map)
-        year_df['pypsa_carrier'] = year_df['commodity_code'].map(commodity_pypsa_map)
+    year_df['agg_level_1'] = year_df['process_code'].map(process_agg_map)
+    year_df['pypsa_carrier'] = year_df['commodity_code'].map(commodity_pypsa_map)
         
         # Extract values for each category
-        results = []
+    results = []
         
-        for category, (var_type, filter_type, filter_values) in extraction_rules.items():
+    for category, (var_type, filter_type, filter_values) in extraction_rules.items():
             # Start with all flow types (don't filter by variable yet if netting is enabled)
             # Netting requires both VAR_FIN and VAR_FOUT to compute net flows correctly
             if apply_netting:
@@ -755,12 +755,12 @@ def extract_pypsa_demands(annual_values_df,mapping, raw_flows_df, processes_df, 
                 'PJ': total_pj
             })
         
-        # Save to CSV
-        results_df = pd.DataFrame(results)
-        results_df["year"] = planning_horizon
-        output_file = snakemake.output.wallon_demands
-        results_df.to_csv(output_file, index=False)
-        logger.info(f"  Saved {output_file}")
+    # Save to CSV
+    results_df = pd.DataFrame(results)
+    results_df["year"] = planning_horizon
+    output_file = snakemake.output.wallon_demands
+    results_df.to_csv(output_file, index=False)
+    logger.info(f"  Saved {output_file}")
     
     logger.info("PyPSA demand extraction complete.\n")
 
@@ -991,8 +991,8 @@ def main():
         raw_flows_df,
         processes_df,
         mapping_df,
-        start_year=2021,
-        end_year=2050,
+        # start_year=2021,
+        # end_year=2050,
         apply_netting=True  # Apply netting to remove internal transfers within aggregated processes
     )
 
