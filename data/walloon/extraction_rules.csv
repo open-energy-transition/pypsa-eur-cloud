@@ -3,25 +3,25 @@ total electricity residential,VAR_FIN,combined,process_agg,residential other,pyp
 total electricity services,VAR_FIN,combined,process_agg,commercial other,pypsa_carrier,Electricity
 electricity road,VAR_FIN,combined,process_agg,EV charger,pypsa_carrier,Electricity
 electricity rail,VAR_FIN,combined,process_agg,rail transport,pypsa_carrier,Electricity
-electricity,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,Electricity
+electricity,VAR_FIN,process_agg,process_agg,PV industrial;Fuel Tech - Electricity (IND);Fuel Tech - Solar (IND),pypsa_carrier,Electricity
 ammonia,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,ammonia
-coal,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,coal for industry
-coke,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,Coke for industry
-hydrogen,VAR_FOUT,combined,process_agg,Imports,pypsa_carrier,hydrogen for industry
-low-temperature heat,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,Heat for industry;Geothermal (IND)
-methane,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,Natural Gas;Network gas;gas for industry;High Temperature Heat for IND
+coal,VAR_FIN,process_agg,process_agg,Fuel Tech - Hard Coal (IND);Fuel Tech - Lignite (IND),pypsa_carrier,coal for industry
+coke,VAR_FIN,process_agg,process_agg,Fuel Tech - Coke (IND),pypsa_carrier,Coke for industry
+hydrogen,VAR_FIN,process_agg,process_agg,hydrogen for industry,pypsa_carrier,hydrogen for industry
+low-temperature heat,VAR_FIN,process_agg,process_agg,Geothermal (IND),pypsa_carrier,Heat for industry;Geothermal (IND)
+methane,VAR_FIN,process_agg,process_agg,Fuel Tech - Biogas (IND);Fuel Tech - Natural Gas transport (IND);Fuel Tech New - Gas and Cog industry (IND);Fuel Tech - Natural Gas and biogas mixed  (IND);Fuel Tech - Liquified Petroleum Gas (IND),pypsa_carrier,Natural Gas;Network gas;gas for industry;High Temperature Heat for IND
 methanol,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,methanol
-naphtha,VAR_FOUT,combined,process_agg,Non-energy,pypsa_carrier,naphtha;oil for industry
-solid biomass,VAR_FIN,combined,process_agg,Industry,pypsa_carrier,solid biomass for industry;Wood pellets for Industry
+naphtha,VAR_FIN,process_agg,process_agg,Non-energy;Fuel Tech - Heavy Fuel Oil (IND);Fuel Tech - Light Fuel Oil (IND),pypsa_carrier,naphtha;oil for industry
+solid biomass,VAR_FIN,process_agg,process_agg,Fuel Tech - Wood material (IND);Fuel Tech - Waste Renewable (IND);Fuel Tech - Wood CHIPS (IND);Fuel Tech - Biofuel (IND),pypsa_carrier,solid biomass for industry;Wood pellets for Industry
 total agriculture,VAR_FIN,process_agg,process_agg,Agriculture,,
 total agriculture electricity,VAR_FIN,combined,process_agg,Agriculture,pypsa_carrier,Electricity for agriculture
 total agriculture heat,VAR_FIN,combined,process_agg,Agriculture,pypsa_carrier,Heat for agriculture;Network gas for agriculture
 total agriculture machinery,VAR_FIN,combined,process_agg,Agriculture,pypsa_carrier,Oil for agriculture;Biodiesel for agriculture;Fuel Tech – Diesel
-total domestic aviation,VAR_FOUT,combined,process_agg,international aviation,pypsa_carrier,domestic aviation
+total domestic aviation,VAR_FOUT,combined,process_agg,domestic aviation,pypsa_carrier,domestic aviation
 total international aviation,VAR_FOUT,combined,process_agg,international aviation,pypsa_carrier,international aviation
 total domestic navigation,VAR_FOUT,combined,process_agg,domestic navigation,pypsa_carrier,domestic navigation
 total international navigation,VAR_FOUT,process_agg,process_agg,international navigation,,
-total road,VAR_FIN,process_agg,process_agg,Cars;Road Freight;2 and 3 wheelers;Road transport (public),,
+total road,VAR_FIN,process_agg,process_agg,Fuel Tech - Biodiesel (TRA);Fuel tech - biogas (TRA);Fuel Tech - Diesel (TRA);Fuel Tech - Ethanol (TRA);Fuel Tech - H2;Fuel Tech - Reseau gas mixed (TRA);Fuel Tech - Gasoline (TRA);Fuel Tech - Liquified Petroleum Gas (TRA);EV charger,,
 total rail,VAR_FIN,process_agg,process_agg,rail transport,,
 hydrogen road,VAR_FIN,combined,process_agg,Cars;Road Freight;2 and 3 wheelers;Road transport (public),pypsa_carrier,H2 for transport
 BEWAL residential urban decentral heat,VAR_FOUT,combined,process_agg,Residential urban decentral Coal heater;Residential urban decentral electric heater;Residential urban decentral Heat pump;Residential urban decentral geothermal heating;Residential urban decentral gas heater;Residential urban decentral biomass heater;Residential urban decentral solar thermal;Residential urban decentral oil heater,pypsa_carrier,Heat
@@ -52,4 +52,3 @@ services oil boiler,VAR_FOUT,combined,process_agg,Commercial Oil boiler,pypsa_ca
 services geothermal,VAR_FOUT,combined,process_agg,commercial Geothermal,pypsa_carrier,Heat
 services electric heater,VAR_FOUT,combined,process_agg,Commercial electrical stove,pypsa_carrier,Heat
 services solar thermal,VAR_FOUT,combined,process_agg,Commercial solar thermal,pypsa_carrier,Heat
-

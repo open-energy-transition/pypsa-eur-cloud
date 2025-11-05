@@ -462,28 +462,28 @@ IMPOILHFO,Imports,SUP,.IMP.IRE.,Import Residual Fuel Oil,PJ,-,IRE,OILHFO,ANNUAL,
 IMPOILKER,Imports,SUP,.IMP.IRE.,Import Kerosenes - Jet Fuels,PJ,-,IRE,OILKER,ANNUAL,"0,00",Imports,Imports
 IMPOILLPG,Imports,SUP,.IMP.IRE.,Import Liquified Petroleum Gas,PJ,-,IRE,OILLPG,ANNUAL,"0,00",Imports,Imports
 IMPOILOTH,Imports,SUP,.IMP.IRE.,Import Other Petroleum Products,PJ,-,IRE,OILOTH,ANNUAL,"0,00",Imports,Imports
-INDBGS00,Fuel Tech - BioGas,IND,.PRE.,Fuel Tech - Biogas (IND),PJ,PJA,PRE,INDBGS,ANNUAL,"0,00",Fuel Tech - Biogas,Fuel Tech - Natural Gas biogas mixed
-INDBIO00,Fuel Tech - Biofuel,IND,.PRE.,Fuel Tech - Biofuel (IND),PJ,PJA,PRE,INDBIO,ANNUAL,"0,00",Fuel Tech - Biofuel,Biofuels
-INDCOA00,Fuel Tech - Hard Coal,IND,.PRE.,Fuel Tech - Hard Coal (IND),PJ,PJA,PRE,INDCOA,ANNUAL,"0,00",Fuel Tech - Hard Coal,Coal
-INDCOK00,Fuel Tech - Coke,IND,.PRE.,Fuel Tech - Coke (IND),PJ,PJA,PRE,INDCOK,ANNUAL,"0,00",Fuel Tech - Coke,Coal
-INDCOL00,Fuel Tech - Lignite,IND,.PRE.,Fuel Tech - Lignite (IND),PJ,PJA,PRE,INDCOL,ANNUAL,"0,00",Fuel Tech - Lignite,Coal
-INDCPS00,Fuel Tech - Wood Chips,IND,.PRE.,Fuel Tech - Wood CHIPS (IND),PJ,PJA,PRE,INDCPS,ANNUAL,"0,00",Fuel Tech - Wood Chips,Fuel Tech - Wood Chips
-INDELC00,Fuel Tech - Electricity,IND,.PRE.,Fuel Tech - Electricity (IND),PJ,GW,PRE,INDELC,DAYNITE,"0,00",Fuel Tech - Electricity,Fuel Tech - Electricity
-INDGAS00,Fuel Tech - Natural Gas transport,IND,.PRE.,Fuel Tech - Natural Gas transport (IND),PJ,PJA,PRE,INDGAS,ANNUAL,"0,00",Fuel Tech - Natural Gas transport,Fuel Tech - Natural Gas transport
-INDGASCOG01,Fuel Tech New - Gas and Cog industry,IND,.PRE.,Fuel Tech New - Gas and Cog industry (IND),PJ,PJA,PRE,INDGASCOG,ANNUAL,"1,00",Fuel Tech New - Gas and Cog industry,Fuel Tech New - Gas and Cog industry
-INDGEO00,Fuel Tech - Solar,IND,.PRE.,Fuel Tech - Solar (IND),PJ,PJA,PRE,INDGEO,ANNUAL,"0,00",Fuel Tech - Solar,Solar
+INDBGS00,Fuel Tech - BioGas,IND,.PRE.,Fuel Tech - Biogas (IND),PJ,PJA,PRE,INDBGS,ANNUAL,"0,00",Fuel Tech - Biogas,Fuel Tech - Biogas (IND)
+INDBIO00,Fuel Tech - Biofuel,IND,.PRE.,Fuel Tech - Biofuel (IND),PJ,PJA,PRE,INDBIO,ANNUAL,"0,00",Fuel Tech - Biofuel,Fuel Tech - Biofuel (IND)
+INDCOA00,Fuel Tech - Hard Coal,IND,.PRE.,Fuel Tech - Hard Coal (IND),PJ,PJA,PRE,INDCOA,ANNUAL,"0,00",Fuel Tech - Hard Coal,Fuel Tech - Coke (IND)
+INDCOK00,Fuel Tech - Coke,IND,.PRE.,Fuel Tech - Coke (IND),PJ,PJA,PRE,INDCOK,ANNUAL,"0,00",Fuel Tech - Coke,Fuel Tech - Hard Coal (IND)
+INDCOL00,Fuel Tech - Lignite,IND,.PRE.,Fuel Tech - Lignite (IND),PJ,PJA,PRE,INDCOL,ANNUAL,"0,00",Fuel Tech - Lignite,Fuel Tech - Lignite (IND)
+INDCPS00,Fuel Tech - Wood Chips,IND,.PRE.,Fuel Tech - Wood CHIPS (IND),PJ,PJA,PRE,INDCPS,ANNUAL,"0,00",Fuel Tech - Wood Chips,Fuel Tech - Wood CHIPS (IND)
+INDELC00,Fuel Tech - Electricity,IND,.PRE.,Fuel Tech - Electricity (IND),PJ,GW,PRE,INDELC,DAYNITE,"0,00",Fuel Tech - Electricity,Fuel Tech - Electricity (IND)
+INDGAS00,Fuel Tech - Natural Gas transport,IND,.PRE.,Fuel Tech - Natural Gas transport (IND),PJ,PJA,PRE,INDGAS,ANNUAL,"0,00",Fuel Tech - Natural Gas transport,Fuel Tech - Natural Gas transport (IND)
+INDGASCOG01,Fuel Tech New - Gas and Cog industry,IND,.PRE.,Fuel Tech New - Gas and Cog industry (IND),PJ,PJA,PRE,INDGASCOG,ANNUAL,"1,00",Fuel Tech New - Gas and Cog industry,Fuel Tech New - Gas and Cog industry (IND)
+INDGEO00,Geothermal (IND),IND,.PRE.,Geothermal (IND),PJ,PJA,PRE,INDGEO,ANNUAL,"0,00",Geothermal (IND),Geothermal (IND)
 INDGH2C01,hydrogen for industry,SUP,.PRE.,Fuel Tech - H2 Delivery from centralized production (COMP+TR+DP - Industrial),PJ,PJ-A,PRE,INDHH2,DAYNITE,,hydrogen for industry,hydrogen for industry
 INDGH2C01_i,Imports,SUP,.PRE.,INDGH2C01_i,PJ,PJ-A,PRE,INDHH2,DAYNITE,,Imports,Imports
-INDGMX00,Fuel Tech - Natural Gas and biogas mixed,IND,.PRE.,Fuel Tech - Natural Gas and biogas mixed  (IND),PJ,PJA,PRE,INDGMX,ANNUAL,"0,00",Fuel Tech - Natural Gas and biogas mixed,Fuel Tech - Natural Gas biogas mixed
-INDHFO00,Fuel Tech - Heavy Fuel Oil ,IND,.PRE.,Fuel Tech - Heavy Fuel Oil (IND),PJ,PJA,PRE,INDHFO,ANNUAL,"0,00",Fuel Tech - Heavy Fuel Oil ,Oil
+INDGMX00,Fuel Tech - Natural Gas and biogas mixed,IND,.PRE.,Fuel Tech - Natural Gas and biogas mixed  (IND),PJ,PJA,PRE,INDGMX,ANNUAL,"0,00",Fuel Tech - Natural Gas and biogas mixed,Fuel Tech - Natural Gas and biogas mixed  (IND)
+INDHFO00,Fuel Tech - Heavy Fuel Oil ,IND,.PRE.,Fuel Tech - Heavy Fuel Oil (IND),PJ,PJA,PRE,INDHFO,ANNUAL,"0,00",Fuel Tech - Heavy Fuel Oil ,Fuel Tech - Heavy Fuel Oil (IND)
 INDHTH00,Fuel Tech - Heat,IND,.PRE.,industry high temperature heat,PJ,PJA,PRE,INDHET,ANNUAL,"0,00",Fuel Tech - Heat,Fuel Tech - Heat
 INDIIS01,Fuel Tech New - IIS GMX - Corex GMX or BFG TGR with CCS or BOF,IND,.PRE.,Fuel Tech New - IIS GMX - Corex GMX or BFG TGR with CCS or BOF (IND),PJ,PJA,PRE,INDIIS,ANNUAL,"1,00",Fuel Tech New - IIS GMX - Corex GMX or BFG TGR with CCS or BOF,Local production
-INDLFO00,Fuel Tech - Light Fuel Oil ,IND,.PRE.,Fuel Tech - Light Fuel Oil (IND),PJ,PJA,PRE,INDLFO,ANNUAL,"0,00",Fuel Tech - Light Fuel Oil ,Oil
-INDLPG00,Fuel Tech - Liquified Petroleum Gas,IND,.PRE.,Fuel Tech - Liquified Petroleum Gas (IND),PJ,PJA,PRE,INDLPG,ANNUAL,"0,00",Fuel Tech - Liquified Petroleum Gas,Fuel Tech - Liquified Petroleum Gas
+INDLFO00,Fuel Tech - Light Fuel Oil ,IND,.PRE.,Fuel Tech - Light Fuel Oil (IND),PJ,PJA,PRE,INDLFO,ANNUAL,"0,00",Fuel Tech - Light Fuel Oil ,Fuel Tech - Light Fuel Oil (IND)
+INDLPG00,Fuel Tech - Liquified Petroleum Gas,IND,.PRE.,Fuel Tech - Liquified Petroleum Gas (IND),PJ,PJA,PRE,INDLPG,ANNUAL,"0,00",Fuel Tech - Liquified Petroleum Gas,Fuel Tech - Liquified Petroleum Gas (IND)
 INDPVELC,PV industrial,IND,.ELE.,PV industrial,PJ,GW,ELE,INDPVELC_NRGO,DAYNITE,"0,00",PV industrial,PV industrial
-INDSLU00,Fuel Tech - Waste Renewable,IND,.PRE.,Fuel Tech - Waste Renewable (IND),PJ,PJA,PRE,INDSLU,ANNUAL,"0,00",Fuel Tech - Waste Renewable,Fuel Tech - Waste Renewable
-INDSOL00,Fuel Tech - Solar,IND,.PRE.,Fuel Tech - Solar (IND),PJ,PJA,PRE,INDSOL,ANNUAL,"0,00",Fuel Tech - Solar,Solar
-INDWOO00,Fuel Tech - Wood material,IND,.PRE.,Fuel Tech - Wood material (IND),MT,MTA,PRE,MBRWOO,ANNUAL,"0,00",Fuel Tech - Wood material,Fuel Tech - Wood material
+INDSLU00,Fuel Tech - Waste Renewable,IND,.PRE.,Fuel Tech - Waste Renewable (IND),PJ,PJA,PRE,INDSLU,ANNUAL,"0,00",Fuel Tech - Waste Renewable,Fuel Tech - Waste Renewable (IND)
+INDSOL00,Fuel Tech - Solar,IND,.PRE.,Fuel Tech - Solar (IND),PJ,PJA,PRE,INDSOL,ANNUAL,"0,00",Fuel Tech - Solar,Fuel Tech - Solar (IND)
+INDWOO00,Fuel Tech - Wood material,IND,.PRE.,Fuel Tech - Wood material (IND),MT,MTA,PRE,MBRWOO,ANNUAL,"0,00",Fuel Tech - Wood material,Fuel Tech - Wood material (IND)
 INDWST00,Fuel Tech - Waste Non-Renewable,IND,.PRE.,Fuel Tech - Waste Non-Renewable (IND),PJ,PJA,PRE,INDWST,ANNUAL,"0,00",Fuel Tech - Waste Non-Renewable,Fuel Tech - Waste Non-Renewable
 INFDEMAND00,Energy demands for industrial processes,IND,.DMD.,INF.Other Non Ferrous Metals.00.,PJ,PJA,DMD,INF,ANNUAL,"0,00",Industry,Industry
 INFELEELC00,industrial processes,IND,.PRE.,INF.Other Non Ferrous Metals.Electro-Chemical Processes.ELC.00,PJ,PJA,PRE,INFELE,ANNUAL,"0,00",Industry,Industry
@@ -824,8 +824,8 @@ SUPDST00,Fuel Tech - Mazout,SUP,.PRE.,Fuel Tech - Mazout (SUP),PJ,PJA,PRE,SUPDST
 SUPELC00,Fuel Tech - Electricity,SUP,.PRE.,Fuel Tech - Electricity (SUP),PJ,PJA,PRE,SUPELC,ANNUAL,"0,00",Fuel Tech - Electricity,Fuel Tech - Electricity
 SUPGAS00,Fuel Tech - Natural Gas,SUP,.PRE.,Fuel Tech - Natural Gas (SUP),PJ,PJA,PRE,SUPGAS,ANNUAL,"0,00",Fuel Tech - Natural Gas,Fuel Tech - Natural Gas
 SUPGMX00,Fuel Tech - Natural Gas biogas mixed,SUP,.PRE.,Fuel Tech - Natural Gas biogas mixed (SUP),PJ,PJA,PRE,SUPGMX,ANNUAL,"0,00",Fuel Tech - Natural Gas biogas mixed,Fuel Tech - Natural Gas biogas mixed
-TADFKER00,Aviation,TRA,.DMD.,Aviation Domestic Freight Kerosene Tech Existing,PJ,PJA,DMD,TADF,ANNUAL,"0,00",international aviation,international aviation
-TADPKER00,Aviation,TRA,.DMD.,Aviation Domestic Passengers Kerosene Tech Existing,PJ,PJA,DMD,TADP,ANNUAL,"0,00",international aviation,international aviation
+TADFKER00,Aviation,TRA,.DMD.,Aviation Domestic Freight Kerosene Tech Existing,PJ,PJA,DMD,TADF,ANNUAL,"0,00",international aviation,domestic aviation
+TADPKER00,Aviation,TRA,.DMD.,Aviation Domestic Passengers Kerosene Tech Existing,PJ,PJA,DMD,TADP,ANNUAL,"0,00",international aviation,domestic aviation
 TAIFKER00,Aviation,TRA,.DMD.,Aviation International Freight Kerosene Tech Existing,PJ,PJA,DMD,TAIF,ANNUAL,"0,00",international aviation,international aviation
 TAIPKER00,Aviation,TRA,.DMD.,Aviation International Passengers Kerosene Tech Existing,PJ,PJA,DMD,TAIP,ANNUAL,"0,00",international aviation,international aviation
 TAVDOMBDLFN01,Aviation,TRA,.DMD.TADF.,Transport marchandise - Aviation - Domestic - Biokerosene (New),PJ,000VEH,DMD,TADF,ANNUAL,"1,00",domestic aviation,domestic aviation
@@ -903,18 +903,18 @@ TMOTELCN01,2 and 3 wheelers,TRA,.DMD.TRADMO.,Motorcycles Electric New,BVKM,000VE
 TMOTGSL00,2 and 3 wheelers,TRA,.DMD.,Motorcycles Gasoline  Existing,BVKM,000VEH,DMD,TMOT,ANNUAL,"0,00",2 and 3 wheelers,2 and 3 wheelers
 TMOTGSLN01,2 and 3 wheelers,TRA,.DMD.TRADMO.,Motorcycles Gasoline New,BVKM,000VEH,DMD,TMOT,ANNUAL,"1,00",2 and 3 wheelers,2 and 3 wheelers
 TNDFDST00,Navigation Domestic Freight Tech Existing,TRA,.DMD.,Navigation Domestic Freight Tech Existing,BTKM,BTKMA,DMD,TNDF,ANNUAL,"0,00",domestic navigation,domestic navigation
-TRABDL00,Fuel Tech - Biodiesel,TRA,.PRE.,Fuel Tech - Biodiesel (TRA),PJ,PJA,PRE,TRABDL,ANNUAL,"0,00",Fuel Tech - Biodiesel,Fuel Tech - Biodiesel
-TRABGS00,Fuel Tech – Biogas,TRA,.PRE.,Fuel tech - biogas (TRA),PJ,PJA,PRE,TRABGS,ANNUAL,"0,00",Fuel Tech - Biogas,Fuel Tech - Natural Gas biogas mixed
-TRADST00,Fuel Tech – Diesel,TRA,.PRE.,Fuel Tech - Diesel (TRA),PJ,PJA,PRE,TRADST,ANNUAL,"0,00",Fuel Tech – Diesel,Fuel Tech – Diesel
-TRAELC00,electricity transport,TRA,.PRE.,Fuel Tech - Electricity (TRA),PJ,GW,PRE,TRAELC,ANNUAL,"0,00",electricity transport,electricity transport
-TRAETH00,Fuel Tech - Ethanol,TRA,.PRE.,Fuel Tech - Ethanol (TRA),PJ,PJA,PRE,TRAETH,ANNUAL,"0,00",Fuel Tech - Ethanol,Biofuels
+TRABDL00,Fuel Tech - Biodiesel,TRA,.PRE.,Fuel Tech - Biodiesel (TRA),PJ,PJA,PRE,TRABDL,ANNUAL,"0,00",Fuel Tech - Biodiesel (TRA),Fuel Tech - Biodiesel (TRA)
+TRABGS00,Fuel Tech – Biogas,TRA,.PRE.,Fuel tech - biogas (TRA),PJ,PJA,PRE,TRABGS,ANNUAL,"0,00",Fuel tech - biogas (TRA),Fuel tech - biogas (TRA)
+TRADST00,Fuel Tech – Diesel,TRA,.PRE.,Fuel Tech - Diesel (TRA),PJ,PJA,PRE,TRADST,ANNUAL,"0,00",Fuel Tech - Diesel (TRA),Fuel Tech - Diesel (TRA)
+TRAELC00,electricity transport,TRA,.PRE.,Fuel Tech - Electricity (TRA),PJ,GW,PRE,TRAELC,ANNUAL,"0,00",electricity transport,Fuel Tech - Electricity (TRA)
+TRAETH00,Fuel Tech - Ethanol,TRA,.PRE.,Fuel Tech - Ethanol (TRA),PJ,PJA,PRE,TRAETH,ANNUAL,"0,00",Fuel Tech - Ethanol,Fuel Tech - Ethanol (TRA)
 TRAGH2C04,Fuel Tech - H2,SUP,.PRE.,Fuel Tech - H2 Delivery from centralized production (COMP+USTOR+TR+GSTORB+RTS+REFGG (small)),PJ,PJ-A,PRE,TRAGH2,DAYNITE,,Fuel Tech - H2,Fuel Tech - H2
-TRAGMX00,Fuel Tech - Reseau gas mixed,TRA,.PRE.,Fuel Tech - Reseau gas mixed (TRA),PJ,PJA,PRE,TRAGMX,ANNUAL,"0,00",Fuel Tech - Reseau gas mixed,Fuel Tech - Natural Gas biogas mixed
-TRAGSL00,Fuel Tech - Gasoline,TRA,.PRE.,Fuel Tech - Gasoline (TRA),PJ,PJA,PRE,TRAGSL,ANNUAL,"0,00",Fuel Tech - Gasoline,Gasoline
+TRAGMX00,Fuel Tech - Reseau gas mixed,TRA,.PRE.,Fuel Tech - Reseau gas mixed (TRA),PJ,PJA,PRE,TRAGMX,ANNUAL,"0,00",Fuel Tech - Reseau gas mixed,Fuel Tech - Reseau gas mixed (TRA)
+TRAGSL00,Fuel Tech - Gasoline,TRA,.PRE.,Fuel Tech - Gasoline (TRA),PJ,PJA,PRE,TRAGSL,ANNUAL,"0,00",Fuel Tech - Gasoline (TRA),Fuel Tech - Gasoline (TRA)
 TRAKER00,Fuel Tech - Kerosene - Jet Fuels,TRA,.PRE.,Fuel Tech - Kerosene - Jet Fuels (TRA),PJ,PJA,PRE,TRAKER,ANNUAL,"0,00",Fuel Tech - Kerosene - Jet Fuels,Fuel Tech - Kerosene - Jet Fuels
 TRALH2C01,Fuel Tech - H2,SUP,.PRE.,Fuel Tech - H2 Delivery from centralized production (COMP+USTOR+TR+LIQ+LSTORB+RTS+REFLL(large)),PJ,PJ-A,PRE,TRALH2,DAYNITE,,Fuel Tech - H2,Fuel Tech - H2
 TRALH2C02_i,SUP_PRE_PJ_PJ-A,SUP,.PRE.,TRALH2C02_i,PJ,PJ-A,PRE,TRALH2,DAYNITE,,SUP_PRE_PJ_PJ-A,SUP_PRE_PJ_PJ-A
-TRALPG00,Fuel Tech - Liquified Petroleum Gas,TRA,.PRE.,Fuel Tech - Liquified Petroleum Gas (TRA),PJ,PJA,PRE,TRALPG,ANNUAL,"0,00",Fuel Tech - Liquified Petroleum Gas,Fuel Tech - Liquified Petroleum Gas
+TRALPG00,Fuel Tech - Liquified Petroleum Gas,TRA,.PRE.,Fuel Tech - Liquified Petroleum Gas (TRA),PJ,PJA,PRE,TRALPG,ANNUAL,"0,00",Fuel Tech - Liquified Petroleum Gas,Fuel Tech - Liquified Petroleum Gas (TRA)
 TSTGEVCMIDN01,TRA_STG_PJ_GW,TRA,.STG.,TSTGEVCMIDN01,PJ,GW,STG,BATELCOUT,DAYNITE,"0,00",TRA_STG_PJ_GW,TRA_STG_PJ_GW
 TTFELCDST00,rail transport,TRA,.DMD.,Train Freigh Tech Existing,BTKM,BTKMA,DMD,TTF,ANNUAL,"0,00",rail transport,rail transport
 TTPELCDST00,rail transport,TRA,.DMD.,Train Conventional Passengers Tech Existing,BPKM,BPKMA,DMD,TTP,ANNUAL,"0,00",rail transport,rail transport
